@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1E4E3C">
+<title>APX-240 现场排查助手</title>
+<style>
+/* ============ 配色：混凝土灰底 + 深绿；红黄蓝只用于风险等级 ============ */
+:root{
+  --paper:#E8EBE9; --panel:#F7F8F7; --panel-2:#EEF1EF; --ink:#16211D; --ink-2:#3E4A45; --mute:#6D7571;
+  --rule:#D2D8D4; --acc:#1E4E3C; --acc-2:#2C6A52; --acc-soft:#DCE8E2;
+  --red:#B8321F; --red-bg:#FBECE8; --yel:#B07A00; --yel-bg:#FDF4DE; --blu:#1F5FAF; --blu-bg:#E6EEF9;
+  --mono:"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{background:var(--paper);color:var(--ink);font:15px/1.65 var(--sans);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--acc-2);outline-offset:2px}
+
+/* ============ 布局 ============ */
+.app{display:flex;flex-direction:column;height:100dvh;max-width:820px;margin:0 auto}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));background:var(--acc);color:#EAF2EE;flex-shrink:0}
+.logo{width:34px;height:34px;border-radius:7px;background:#EAF2EE;color:var(--acc);display:grid;place-items:center;font:700 12px/1 var(--mono);letter-spacing:-.02em;flex-shrink:0}
+.brand{flex:1;min-width:0}
+.brand h1{margin:0;font-size:16px;font-weight:600;letter-spacing:.01em;line-height:1.3}
+.brand p{margin:0;font-size:11.5px;opacity:.72;letter-spacing:.04em}
+.hbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#EAF2EE;border-radius:6px;padding:6px 11px;font-size:13px;white-space:nowrap}
+.hbtn:active{background:rgba(255,255,255,.22)}
+
+.role{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--rule);font-size:12.5px;color:var(--mute);overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.role::-webkit-scrollbar{display:none}
+.role span{white-space:nowrap}
+.role button{border:1px solid var(--rule);background:#fff;border-radius:99px;padding:3px 11px;font-size:12.5px;white-space:nowrap;color:var(--ink-2)}
+.role button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+
+#log{flex:1;overflow-y:auto;padding:18px 14px 8px;display:flex;flex-direction:column;gap:16px;-webkit-overflow-scrolling:touch}
+#log>*{flex-shrink:0}
+
+/* ============ 用户消息 ============ */
+.u{align-self:flex-end;max-width:86%;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.u .b{background:var(--ink);color:#F1F4F2;padding:9px 13px;border-radius:12px 12px 3px 12px;white-space:pre-wrap;word-break:break-word}
+.u img{max-width:180px;max-height:180px;border-radius:8px;border:1px solid var(--rule);display:block}
+.u .meta{font:11px/1.3 var(--mono);color:var(--mute)}
+
+/* ============ 助手输出：诊断卡 ============ */
+.a{background:var(--panel);border:1px solid var(--rule);border-radius:10px;overflow:hidden;word-break:break-word}
+.a .body{padding:4px 16px 14px}
+.a p{margin:6px 0}
+.wait{display:flex;align-items:center;gap:10px;padding:14px 16px;color:var(--ink-2);font-size:14px}
+.pulse{width:9px;height:9px;border-radius:50%;background:var(--acc-2);animation:p 1.1s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+.wait .sec{font:12px var(--mono);color:var(--mute)}
+
+.act{margin:12px -16px 4px;padding:12px 16px 12px;border-left:5px solid;background:var(--yel-bg);border-color:var(--yel)}
+.act.red{background:var(--red-bg);border-color:var(--red)}
+.act.blu{background:var(--blu-bg);border-color:var(--blu)}
+.act .ah{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.act .ah b{font-size:16px;letter-spacing:.02em}
+.lvl{font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:3px;color:#fff;background:var(--yel);letter-spacing:.04em}
+.act.red .lvl{background:var(--red)} .act.blu .lvl{background:var(--blu)}
+.act .n{font-size:15.5px;font-weight:500}
+.basis{font-size:12px;color:var(--mute);margin-top:6px}
+
+.sec-label{margin:14px 0 2px;font-size:11px;letter-spacing:.18em;color:var(--mute);text-transform:uppercase}
+.fh{margin:16px 0 4px;font-size:13.5px;font-weight:700;color:var(--acc);display:flex;align-items:center;gap:8px}
+.fh::after{content:"";flex:1;height:1px;background:var(--rule)}
+hr.sep{border:0;border-top:1px dashed var(--rule);margin:14px 0 6px}
+
+.n{display:grid;grid-template-columns:22px 1fr;gap:8px;margin:5px 0;align-items:baseline}
+.n i{font:600 11.5px/20px var(--mono);font-style:normal;background:var(--ink);color:#fff;border-radius:4px;text-align:center;height:20px}
+.dot{display:grid;grid-template-columns:14px 1fr;gap:4px;margin:4px 0}
+.dot::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--mute);margin-top:9px}
+
+.cause{margin:6px 0;padding:8px 10px;border:1px solid var(--rule);border-radius:7px;background:#fff}
+.cause.top{border:1.5px solid var(--acc);background:var(--acc-soft)}
+.cause.top::before{content:"最值得先查";display:inline-block;font-size:10.5px;font-weight:600;letter-spacing:.06em;color:#fff;background:var(--acc);padding:0 7px;border-radius:3px;margin-right:6px;vertical-align:1px}
+.cause.out{background:transparent;border-style:dashed;color:var(--mute)}
+
+.st{display:inline-block;font-size:11px;font-weight:700;padding:0 6px;border-radius:3px;margin-right:4px;vertical-align:1px;line-height:18px}
+.st-s{background:var(--ink);color:#fff}
+.st-m{border:1px solid var(--ink-2);color:var(--ink-2);line-height:16px}
+.st-w{background:#E3E6E4;color:var(--mute)}
+.st-x{background:transparent;color:var(--mute);border:1px dashed var(--mute);line-height:16px;text-decoration:line-through}
+.rd{font:600 .95em var(--mono);background:#fff;border:1px solid var(--rule);padding:0 4px;border-radius:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.cause .rd,.act .rd{background:rgba(255,255,255,.7)}
+.src{font-size:11.5px;color:var(--mute);background:var(--panel-2);padding:0 5px;border-radius:3px;margin:0 1px;white-space:normal}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:0 7px;border-radius:3px;color:#fff;line-height:19px;margin:0 2px;white-space:nowrap}
+.u0{background:var(--red)} .u1{background:var(--yel)} .u2{background:var(--blu)}
+
+.esc{display:flex;align-items:center;gap:8px;margin:6px 0;padding:8px 10px;border-radius:7px;background:var(--panel-2);font-size:14px}
+.esc .yn{font-weight:700;padding:1px 9px;border-radius:4px;color:#fff;background:var(--red)}
+.esc .yn.no{background:var(--acc)}
+.callout{margin:10px 0 4px;padding:9px 12px;border-radius:7px;background:var(--yel-bg);border:1px solid #EFD9A3;font-weight:600;font-size:14.5px}
+.callout.img{background:var(--blu-bg);border-color:#C9D8EF}
+.callout + .indent,.indent{margin:2px 0 2px 14px;color:var(--ink-2);font-size:14px;white-space:pre-wrap}
+details.alt{margin:12px 0 4px;border:1px dashed var(--mute);border-radius:7px;background:#fff}
+details.alt summary{padding:9px 12px;font-weight:600;color:var(--ink-2);cursor:pointer;list-style:none}
+details.alt summary::-webkit-details-marker{display:none}
+details.alt summary::before{content:"▸ ";color:var(--mute)}
+details.alt[open] summary::before{content:"▾ "}
+details.alt .inner{padding:0 12px 10px;white-space:pre-wrap;font-size:13.5px;color:var(--ink-2)}
+.foot{margin-top:4px;font-size:11.5px;color:var(--mute)}
+.errbox{margin:12px 16px;padding:10px 12px;border-radius:7px;background:var(--red-bg);border:1px solid #EFC6BD;color:#7A2415;font-size:14px}
+
+/* ============ 欢迎卡 ============ */
+.hello{padding:16px}
+.hello h2{margin:0 0 6px;font-size:17px}
+.hello p{margin:4px 0;color:var(--ink-2)}
+.chips{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.chip{text-align:left;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--acc)}
+.chip:active{background:var(--acc-soft)}
+.cover{margin-top:12px;font:11.5px/1.5 var(--mono);color:var(--mute)}
+
+/* ============ 输入区 ============ */
+.dock{flex-shrink:0;background:var(--panel);border-top:1px solid var(--rule);padding:8px 10px;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+.pending{display:flex;align-items:center;gap:10px;margin:2px 4px 8px;font-size:12.5px;color:var(--ink-2)}
+.pending img{width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--rule)}
+.pending .x{margin-left:auto;background:none;border:1px solid var(--rule);border-radius:6px;padding:3px 9px;font-size:12.5px}
+.pending .ok{font:11.5px var(--mono);color:var(--acc)}
+.row{display:flex;align-items:flex-end;gap:6px}
+.ib{width:42px;height:42px;border-radius:9px;border:1px solid var(--rule);background:#fff;display:grid;place-items:center;flex-shrink:0;color:var(--ink-2)}
+.ib svg{width:21px;height:21px}
+.ib.rec{background:var(--red);border-color:var(--red);color:#fff}
+.send{background:var(--acc);border-color:var(--acc);color:#fff}
+.send:disabled{opacity:.45}
+textarea{flex:1;resize:none;border:1px solid var(--rule);border-radius:9px;padding:10px 12px;font:15px/1.45 var(--sans);min-height:42px;max-height:132px;background:#fff;color:var(--ink)}
+.hint{font-size:11.5px;color:var(--mute);margin:6px 4px 0;min-height:16px}
+.hint.rec{color:var(--red);font-weight:600}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">240</div>
+    <div class="brand">
+      <h1>APX-240 现场排查助手</h1>
+      <p>自动封装设备 · 故障排查</p>
+    </div>
+    <button class="hbtn" id="newChat" type="button">新对话</button>
+  </header>
+
+  <div class="role" id="roleBar" role="group" aria-label="我的身份">
+    <span>我的身份</span>
+    <button type="button" data-role="操作工" aria-pressed="true">操作工</button>
+    <button type="button" data-role="电气维修" aria-pressed="false">电气维修</button>
+    <button type="button" data-role="机械维修" aria-pressed="false">机械维修</button>
+    <button type="button" data-role="安全员" aria-pressed="false">安全员／主管</button>
+  </div>
+
+  <main id="log" aria-live="polite"></main>
+
+  <div class="dock">
+    <div class="pending" id="pending" hidden>
+      <img id="pImg" alt="待发送的照片">
+      <div><div>已添加照片</div><div class="ok" id="pInfo"></div></div>
+      <button class="x" id="pDel" type="button">移除</button>
+    </div>
+    <div class="row">
+      <button class="ib" id="camBtn" type="button" aria-label="拍照或选择照片">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.6"/></svg>
+      </button>
+      <input type="file" id="file" accept="image/*" hidden>
+      <textarea id="q" rows="1" placeholder="报警码、读数、听到看到的异常…"></textarea>
+      <button class="ib" id="micBtn" type="button" aria-label="语音输入">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+      </button>
+      <button class="ib send" id="sendBtn" type="button" aria-label="发送">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <div class="hint" id="hint"></div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   配置：只需要改这里
+   API_KEY 在 Dify →「访问点」→「后端服务 API」→「API 密钥」里创建，形如 app-xxxxxxxx
+   ================================================================ */
+const CONFIG = {
+  API_BASE: "https://api.dify.ai/v1",
+  API_KEY:  "app-Aj930bT31bAlbzcDpX7fxOFB",          // 
+  IMG_MAX_SIDE: 1600,      // 照片长边压到 1600 像素
+  IMG_QUALITY: 0.82,       // JPEG 质量
+  IMG_TARGET_BYTES: 1200000
+};
+
+/* ---------------- 状态 ---------------- */
+const $ = id => document.getElementById(id);
+const log = $("log"), q = $("q"), hint = $("hint");
+let conversationId = "";
+let role = "操作工";
+let pendingImg = null;          // {blob, url, info}
+let busy = false;
+let userId = "apx240-" + Math.random().toString(36).slice(2, 10);
+try { const s = localStorage.getItem("apx240_uid"); if (s) userId = s; else localStorage.setItem("apx240_uid", userId); } catch (e) {}
+
+const SAMPLES = [
+  "A203，设定165，实际158，加热电流3.2A",
+  "A310报警，气压0.45MPa，有持续漏气声",
+  "A205，但这批货今晚要发，能降速跑完吗？"
+];
+
+/* ---------------- 欢迎卡 ---------------- */
+function welcome() {
+  log.innerHTML = "";
+  const d = document.createElement("div");
+  d.className = "a hello";
+  d.innerHTML = `<h2>你好，我是 APX-240 的排查助手</h2>
+    <p>把现场情况告诉我：报警码、面板读数、听到或看到的异常。</p>
+    <p>可以打字，可以按麦克风说话，也可以直接拍一张面板照片。</p>
+    <div class="chips">${SAMPLES.map(s => `<button class="chip" type="button">${esc(s)}</button>`).join("")}</div>
+    <div class="cover">覆盖报警码 A101 · A203 · A205 · A310 · A401 · A520 · A900</div>`;
+  d.querySelectorAll(".chip").forEach(b => b.onclick = () => { q.value = b.textContent; send(); });
+  log.appendChild(d);
+}
+
+/* ---------------- 文本转义与行内格式 ---------------- */
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function inline(s) {
+  s = esc(s);
+  s = s.replace(/〔强〕/g, '<span class="st st-s">强</span>')
+       .replace(/〔中〕/g, '<span class="st st-m">中</span>')
+       .replace(/〔弱〕/g, '<span class="st st-w">弱</span>')
+       .replace(/〔基本排除〕/g, '<span class="st st-x">已排除</span>');
+  s = s.replace(/「([^」]{1,40})」/g, '<b class="rd">$1</b>');
+  s = s.replace(/〔([^〕]{1,80})〕/g, '<span class="src">$1</span>');
+  s = s.replace(/U0\s*特急/g, '<span class="pill u0">U0 特急</span>')
+       .replace(/U1\s*紧急/g, '<span class="pill u1">U1 紧急</span>')
+       .replace(/U2\s*一般/g, '<span class="pill u2">U2 一般</span>');
+  return s;
+}
+
+/* ---------------- 把 Agent 的纯文本输出渲染成诊断卡 ---------------- */
+function render(text) {
+  const lines = text.replace(/\r/g, "").split("\n");
+  let h = "", inAct = false, field = "", inAlt = false, alt = [];
+  const closeAct = () => { if (inAct) { h += "</div>"; inAct = false; } };
+  const closeAlt = () => { if (inAlt) { h += `<div class="inner">${alt.map(inline).join("\n")}</div></details>`; inAlt = false; alt = []; } };
+
+  for (let raw of lines) {
+    const t = raw.replace(/^️/, "").trim();
+    if (inAlt && t && !/^─{3,}/.test(t) && !/^资料截止|^覆盖 A101|^您当前身份/.test(t)) { alt.push(t); continue; }
+    if (!t) continue;
+    let m;
+    if ((m = t.match(/^(🔴|🟡|🔵)\s*立即动作/))) {
+      closeAlt(); closeAct();
+      const cls = m[1] === "🔴" ? "red" : m[1] === "🔵" ? "blu" : "";
+      const lvl = m[1] === "🔴" ? "红色" : m[1] === "🔵" ? "蓝色" : "黄色";
+      h += `<div class="act ${cls}"><div class="ah"><span class="lvl">${lvl}</span><b>立即动作</b></div>`;
+      inAct = true; field = ""; continue;
+    }
+    if (/^─{3,}/.test(t)) { closeAlt(); closeAct(); h += '<hr class="sep">'; continue; }
+    if (/^▼\s*完整诊断卡/.test(t)) { closeAct(); h += '<div class="sec-label">完整诊断卡</div>'; continue; }
+    if ((m = t.match(/^▾\s*(.+)$/))) { closeAct(); closeAlt(); h += `<details class="alt"><summary>${inline(m[1])}</summary>`; inAlt = true; continue; }
+    if ((m = t.match(/^【([^】]+)】\s*(.*)$/))) {
+      closeAct(); field = m[1];
+      h += `<div class="fh">${esc(m[1])}</div>`;
+      if (m[2]) h += `<p>${inline(m[2])}</p>`;
+      continue;
+    }
+    if (/^依据[：:]/.test(t)) { h += `<div class="basis">${inline(t)}</div>`; continue; }
+    if ((m = t.match(/^是否升级专家[：:]\s*(是|否)\s*(.*)$/))) {
+      h += `<div class="esc"><span>是否升级专家</span><span class="yn ${m[1] === "否" ? "no" : ""}">${m[1]}</span><span>${inline(m[2].replace(/^[—\-–]\s*/, ""))}</span></div>`;
+      continue;
+    }
+    if (/^(📷|⚠️|⚠|📍)/.test(t) || /^存在未裁决的证据冲突/.test(t)) { closeAct(); h += `<div class="callout ${t.startsWith("📷") ? "img" : ""}">${inline(t)}</div>`; continue; }
+    if (/^资料截止|^覆盖 A101|^您当前身份/.test(t)) { closeAct(); h += `<div class="foot">${inline(t)}</div>`; continue; }
+    if ((m = t.match(/^▶\s*(.*)$/))) { h += `<div class="cause top">${inline(m[1])}</div>`; continue; }
+    if ((m = t.match(/^✕\s*(.*)$/))) { h += `<div class="cause out">${inline(m[1])}</div>`; continue; }
+    if ((m = t.match(/^·\s*(.*)$/))) { h += field === "可能原因" ? `<div class="cause">${inline(m[1])}</div>` : `<div class="dot"><span>${inline(m[1])}</span></div>`; continue; }
+    if ((m = t.match(/^(\d{1,2})[.．、]\s*(.*)$/))) { h += `<div class="n"><i>${m[1]}</i><span>${inline(m[2])}</span></div>`; continue; }
+    if (/^\s{2,}/.test(raw)) { h += `<div class="indent">${inline(t)}</div>`; continue; }
+    h += `<p>${inline(t)}</p>`;
+  }
+  closeAlt(); closeAct();
+  return h;
+}
+
+/* ---------------- 消息 DOM ---------------- */
+function addUser(text, imgUrl, info) {
+  const d = document.createElement("div");
+  d.className = "u";
+  d.innerHTML = (imgUrl ? `<img src="${imgUrl}" alt="现场照片">` : "") +
+                (info ? `<div class="meta">${esc(info)}</div>` : "") +
+                (text ? `<div class="b">${esc(text)}</div>` : "");
+  log.appendChild(d); scroll();
+}
+function addAssistant() {
+  const d = document.createElement("div");
+  d.className = "a";
+  d.innerHTML = `<div class="wait"><span class="pulse"></span><span>正在查阅说明书与维修记录</span><span class="sec">0s</span></div><div class="body" hidden></div>`;
+  log.appendChild(d); scroll();
+  return d;
+}
+function scroll() { requestAnimationFrame(() => log.scrollTop = log.scrollHeight); }
+
+/* ---------------- 照片：在手机上先压缩，再上传 ---------------- */
+function loadImage(file) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => res({ img, url });
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("decode")); };
+    img.src = url;
+  });
+}
+function toBlob(canvas, quality) { return new Promise(r => canvas.toBlob(r, "image/jpeg", quality)); }
+async function compress(file) {
+  const { img, url } = await loadImage(file);
+  let w = img.naturalWidth, h = img.naturalHeight;
+  const s = Math.min(1, CONFIG.IMG_MAX_SIDE / Math.max(w, h));
+  w = Math.round(w * s); h = Math.round(h * s);
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h); ctx.drawImage(img, 0, 0, w, h);
+  URL.revokeObjectURL(url);
+  let quality = CONFIG.IMG_QUALITY, blob = await toBlob(c, quality);
+  while (blob && blob.size > CONFIG.IMG_TARGET_BYTES && quality > 0.45) { quality -= 0.12; blob = await toBlob(c, quality); }
+  if (!blob) throw new Error("encode");
+  return { blob, w, h };
+}
+const fmt = n => n >= 1048576 ? (n / 1048576).toFixed(1) + "MB" : Math.max(1, Math.round(n / 1024)) + "KB";
+
+$("camBtn").onclick = () => $("file").click();
+$("file").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  setHint("正在处理照片…");
+  try {
+    const { blob, w, h } = await compress(f);
+    if (pendingImg) URL.revokeObjectURL(pendingImg.url);
+    pendingImg = { blob, url: URL.createObjectURL(blob), info: `照片已压缩 ${fmt(f.size)} → ${fmt(blob.size)}（${w}×${h}）` };
+    $("pImg").src = pendingImg.url; $("pInfo").textContent = pendingImg.info; $("pending").hidden = false;
+    setHint("可以补一句描述，也可以直接发送");
+  } catch (err) {
+    setHint("");
+    alertBox("这张照片浏览器无法读取。如果是苹果手机，可在「设置 → 相机 → 格式」改为「兼容性最佳」后重拍，或换一张照片。");
+  }
+};
+$("pDel").onclick = clearPending;
+function clearPending() { if (pendingImg) URL.revokeObjectURL(pendingImg.url); pendingImg = null; $("pending").hidden = true; }
+
+/* ---------------- 调用 Dify ---------------- */
+async function uploadFile(blob, name) {
+  const fd = new FormData();
+  fd.append("file", blob, name);
+  fd.append("user", userId);
+  const r = await fetch(`${CONFIG.API_BASE}/files/upload`, { method: "POST", headers: { Authorization: `Bearer ${CONFIG.API_KEY}` }, body: fd });
+  if (!r.ok) throw new Error(`照片上传失败（${r.status}）${await r.text().catch(() => "")}`);
+  return (await r.json()).id;
+}
+
+async function send() {
+  if (busy) return;
+  let text = q.value.trim();
+  if (!text && !pendingImg) return;
+  busy = true; $("sendBtn").disabled = true;
+
+  const img = pendingImg; pendingImg = null; $("pending").hidden = true;
+  addUser(text, img && img.url, img && img.info);
+  q.value = ""; autosize(); setHint("");
+
+  let query = text || "请识别这张面板照片并诊断";
+  if (role !== "操作工") query += `（我是${role}）`;
+
+  const card = addAssistant();
+  const waitEl = card.querySelector(".wait"), secEl = card.querySelector(".sec"), bodyEl = card.querySelector(".body");
+  const t0 = Date.now();
+  const timer = setInterval(() => secEl.textContent = Math.round((Date.now() - t0) / 1000) + "s", 500);
+  let answer = "", raf = 0;
+  const paint = () => { raf = 0; waitEl.hidden = true; bodyEl.hidden = false; bodyEl.innerHTML = render(answer); scroll(); };
+  const schedule = () => { if (!raf) raf = requestAnimationFrame(paint); };
+
+  try {
+    const files = [];
+    if (img) {
+      card.querySelector(".wait span:nth-child(2)").textContent = "正在上传照片";
+      files.push({ type: "image", transfer_method: "local_file", upload_file_id: await uploadFile(img.blob, "panel.jpg") });
+      card.querySelector(".wait span:nth-child(2)").textContent = "正在查阅说明书与维修记录";
+    }
+    const r = await fetch(`${CONFIG.API_BASE}/chat-messages`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${CONFIG.API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ inputs: {}, query, response_mode: "streaming", conversation_id: conversationId, user: userId, files })
+    });
+    if (!r.ok || !r.body) throw new Error(`服务返回 ${r.status}：${await r.text().catch(() => "")}`);
+
+    const reader = r.body.getReader(), dec = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n\n")) >= 0) {
+        const chunk = buf.slice(0, i); buf = buf.slice(i + 2);
+        for (const line of chunk.split("\n")) {
+          if (!line.startsWith("data:")) continue;
+          let ev; try { ev = JSON.parse(line.slice(5).trim()); } catch (e) { continue; }
+          if (ev.conversation_id) conversationId = ev.conversation_id;
+          if (ev.event === "agent_message" || ev.event === "message") { answer += ev.answer || ""; schedule(); }
+          else if (ev.event === "message_replace") { answer = ev.answer || ""; schedule(); }
+          else if (ev.event === "error") throw new Error(ev.message || ev.code || "未知错误");
+        }
+      }
+    }
+    if (!answer.trim()) throw new Error("没有收到任何回复内容");
+    paint();
+  } catch (err) {
+    // 出错后自动换一轮新对话：失败的内容不再留在对话历史里，避免后续每一问都跟着失败
+    conversationId = "";
+    waitEl.hidden = true;
+    if (answer) { bodyEl.hidden = false; bodyEl.innerHTML = render(answer); }
+    const box = document.createElement("div");
+    box.className = "errbox";
+    box.textContent = `这一问没有完成（${String(err.message || err).slice(0, 160)}）。已自动开启新对话，可以直接重新发送。`;
+    card.appendChild(box);
+    if (text) q.value = text;
+    autosize(); scroll();
+  } finally {
+    clearInterval(timer); busy = false; $("sendBtn").disabled = false;
+  }
+}
+function alertBox(msg) { const d = document.createElement("div"); d.className = "a"; d.innerHTML = `<div class="errbox">${esc(msg)}</div>`; log.appendChild(d); scroll(); }
+
+$("sendBtn").onclick = send;
+q.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing && window.matchMedia("(pointer:fine)").matches) { e.preventDefault(); send(); } });
+function autosize() { q.style.height = "auto"; q.style.height = Math.min(q.scrollHeight, 132) + "px"; }
+q.addEventListener("input", autosize);
+function setHint(s, rec) { hint.textContent = s; hint.className = "hint" + (rec ? " rec" : ""); }
+
+$("newChat").onclick = () => { if (busy) return; conversationId = ""; clearPending(); q.value = ""; autosize(); setHint(""); welcome(); };
+document.querySelectorAll("#roleBar button").forEach(b => b.onclick = () => {
+  role = b.dataset.role;
+  document.querySelectorAll("#roleBar button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+});
+
+/* ---------------- 语音：录成 16kHz WAV，交给 Dify 语音转文字 ---------------- */
+let rec = null;
+$("micBtn").onclick = async () => { if (rec) stopRec(); else startRec(); };
+async function startRec() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { setHint("这个浏览器不支持录音，请改用打字"); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = ctx.createMediaStreamSource(stream);
+    const proc = ctx.createScriptProcessor(4096, 1, 1);
+    const chunks = [];
+    proc.onaudioprocess = e => chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+    src.connect(proc); proc.connect(ctx.destination);
+    const t0 = Date.now();
+    const tick = setInterval(() => {
+      const s = Math.round((Date.now() - t0) / 1000);
+      setHint(`正在录音 ${s}s · 再点一次麦克风结束`, true);
+      if (s >= 60) stopRec();
+    }, 250);
+    rec = { stream, ctx, src, proc, chunks, tick };
+    $("micBtn").classList.add("rec");
+    setHint("正在录音 0s · 再点一次麦克风结束", true);
+  } catch (e) {
+    setHint("没有拿到麦克风权限，请在浏览器设置里允许，或改用打字");
+  }
+}
+async function stopRec() {
+  const r = rec; rec = null;
+  clearInterval(r.tick);
+  $("micBtn").classList.remove("rec");
+  r.proc.disconnect(); r.src.disconnect(); r.stream.getTracks().forEach(t => t.stop());
+  const rate = r.ctx.sampleRate; r.ctx.close();
+  const len = r.chunks.reduce((a, c) => a + c.length, 0);
+  if (len < rate * 0.4) { setHint("录音太短，请再说一次"); return; }
+  const all = new Float32Array(len); let o = 0; for (const c of r.chunks) { all.set(c, o); o += c.length; }
+  const wav = encodeWav(downsample(all, rate, 16000), 16000);
+  setHint("正在转成文字…");
+  try {
+    const fd = new FormData(); fd.append("file", wav, "voice.wav"); fd.append("user", userId);
+    const resp = await fetch(`${CONFIG.API_BASE}/audio-to-text`, { method: "POST", headers: { Authorization: `Bearer ${CONFIG.API_KEY}` }, body: fd });
+    if (!resp.ok) throw new Error(resp.status + " " + (await resp.text().catch(() => "")));
+    const txt = ((await resp.json()).text || "").trim();
+    if (!txt) { setHint("没有听清，请再说一次"); return; }
+    q.value = (q.value ? q.value + "，" : "") + txt; autosize(); q.focus();
+    setHint("已转成文字，请核对报警码和读数后再发送");
+  } catch (e) {
+    setHint("语音转文字失败，请改用打字（" + String(e.message).slice(0, 60) + "）");
+  }
+}
+function downsample(buf, from, to) {
+  if (from === to) return buf;
+  const ratio = from / to, n = Math.floor(buf.length / ratio), out = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const a = Math.floor(i * ratio), b = Math.min(buf.length, Math.floor((i + 1) * ratio));
+    let s = 0; for (let j = a; j < b; j++) s += buf[j]; out[i] = s / Math.max(1, b - a);
+  }
+  return out;
+}
+function encodeWav(samples, rate) {
+  const buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, "RIFF"); v.setUint32(4, 36 + samples.length * 2, true); w(8, "WAVE"); w(12, "fmt ");
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, "data"); v.setUint32(40, samples.length * 2, true);
+  for (let i = 0, o = 44; i < samples.length; i++, o += 2) { const s = Math.max(-1, Math.min(1, samples[i])); v.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7fff, true); }
+  return new Blob([buf], { type: "audio/wav" });
+}
+
+welcome();
+if (/REPLACE/.test(CONFIG.API_KEY) || !/^app-[A-Za-z0-9]+$/.test(CONFIG.API_KEY)) {
+  alertBox("还没有填写 API 密钥：请在 index.html 顶部 CONFIG 里把 app-REPLACE_ME 换成 Dify 生成的密钥（形如 app-xxxxxxxx）。");
+}
+</script>
+</body>
+</html>
