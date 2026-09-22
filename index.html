@@ -487,7 +487,8 @@ const CONFIG = {
   IMG_MAX_SIDE: 1600,      // 照片长边压到 1600 像素
   IMG_QUALITY: 0.82,       // JPEG 质量
   IMG_TARGET_BYTES: 1200000,
-  IDLE_TIMEOUT_MS: 90000   // 连续 90 秒没有收到任何数据，视为超时
+  IDLE_TIMEOUT_MS: 90000,  // 连续 90 秒没有收到任何数据，视为超时
+  FIRST_TEXT_TIMEOUT_MS: 75000  // 75 秒内一个字都没有输出（心跳包不算），视为超时
 };
 
 /* =====================================================================
@@ -969,12 +970,36 @@ async function streamChat({ query, files, signal, onAnswer, onActivity }) {
 }
 
 /* =====================================================================
+   I2. 使用说明：“你会做什么”这类问题由页面直接回答，不调用 Agent
+   ===================================================================== */
+const HELP_RE = /^(你好|您好|hi|hello|hey|在吗|在不在|你是谁|你是什么|你叫什么|你会(做|干)?(些)?什么|你能(做|干)?(些)?什么|能(做|干)(些)?什么|有(哪些|什么)功能|怎么用|如何使用|怎么使用|使用说明|帮助|help|介绍(一下)?(你自己)?)[\s，,。.!！?？吗呢呀啊]*$/i;
+function isHelp(t) { return t.length <= 24 && !PROTO.code.test(t) && HELP_RE.test(t.trim()); }
+function addHelp() {
+  const d = document.createElement("div");
+  d.className = "a";
+  d.innerHTML = `<div class="ahd"><span class="av">${ICON.bot}</span><b>使用说明</b><span class="sp"></span></div>
+    <div class="body"><div class="blk-h" style="margin-top:6px">我能做什么</div>
+    <div class="gen">
+      <div class="nl"><i>1</i><span>根据报警码、面板读数和现场现象，给出立即动作、可能原因、排查顺序，以及是否需要升级专家</span></div>
+      <div class="nl"><i>2</i><span>识别操作面板照片，直接拍照上传即可，照片会自动压缩；看不清时会提示补拍</span></div>
+      <div class="nl"><i>3</i><span>用语音描述现场情况，转成文字后由你核对再发送</span></div>
+      <div class="nl"><i>4</i><span>按你在右上角选择的身份，调整可以执行的排查步骤</span></div>
+    </div>
+    <div class="blk"><div class="blk-h">覆盖范围</div><p style="margin:0">APX-240 的 7 个报警码：A101、A203、A205、A310、A401、A520、A900。资料以外的报警码不做推测，直接给出停机与升级路径。</p></div>
+    <div class="blk"><div class="blk-h">试一试</div><div class="evid">${SAMPLES.map((s, i) => `<button type="button" class="chip-c" data-i="${i}" style="cursor:pointer">${s.code} ${esc(s.label)}</button>`).join("")}</div></div>
+    <div class="foot">这是页面内置的使用说明，未调用 Agent。</div></div>`;
+  d.querySelectorAll("[data-i]").forEach(b => b.onclick = () => { q.value = SAMPLES[+b.dataset.i].q; send(); });
+  log.appendChild(d); scroll(true);
+}
+
+/* =====================================================================
    J. 发送（组织请求的逻辑与上一版一致：同样的 query、身份拼接、文件参数）
    ===================================================================== */
 async function send() {
   if (busy) return;
   let text = q.value.trim();
   if (!text && !pendingImg) return;
+  if (!pendingImg && isHelp(text)) { addUser(text); addHelp(); q.value = ""; autosize(); setHint(""); return; }
   setBusy(true);
 
   const img = pendingImg; pendingImg = null; $("pending").hidden = true;
@@ -1000,6 +1025,8 @@ async function send() {
   let idle;
   const kick = () => { clearTimeout(idle); idle = setTimeout(() => { current.reason = "timeout"; ctrl.abort(); }, CONFIG.IDLE_TIMEOUT_MS); };
   kick();
+  let firstT = 0;
+  const armFirst = () => { clearTimeout(firstT); firstT = setTimeout(() => { if (!answer) { current.reason = "notext"; ctrl.abort(); } }, CONFIG.FIRST_TEXT_TIMEOUT_MS); };
 
   try {
     const files = [];
@@ -1009,9 +1036,10 @@ async function send() {
       wtxt.textContent = "正在查阅说明书与维修记录"; me.phase = "wait"; sync();
       kick();
     }
+    armFirst();
     answer = await streamChat({
       query, files, signal: ctrl.signal,
-      onAnswer: a => { answer = a; me.phase = "stream"; schedule(); },
+      onAnswer: a => { answer = a; clearTimeout(firstT); me.phase = "stream"; schedule(); },
       onActivity: kick
     });
     if (!answer.trim()) throw new Error("没有收到任何回复内容");
@@ -1032,7 +1060,9 @@ async function send() {
       // 出错后自动换一轮新对话：失败的内容不再留在对话历史里，避免后续每一问都跟着失败（与上一版一致）
       conversationId = "";
       me.phase = "error";
-      const msg = current.reason === "timeout" ? `超过 ${Math.round(CONFIG.IDLE_TIMEOUT_MS / 1000)} 秒没有收到回复` : String(err.message || err).slice(0, 160);
+      const msg = current.reason === "timeout" ? `超过 ${Math.round(CONFIG.IDLE_TIMEOUT_MS / 1000)} 秒没有收到回复`
+        : current.reason === "notext" ? `Agent 超过 ${Math.round(CONFIG.FIRST_TEXT_TIMEOUT_MS / 1000)} 秒没有开始回复。可以直接描述报警码、面板读数或现场现象`
+        : String(err.message || err).slice(0, 160);
       box.className = "note err";
       box.textContent = `这一问没有完成（${msg}）。已自动开启新对话，可以直接重新发送。`;
       if (text) q.value = text;
@@ -1040,7 +1070,7 @@ async function send() {
     card.appendChild(box);
     autosize(); scroll(true);
   } finally {
-    clearInterval(timer); clearTimeout(idle);
+    clearInterval(timer); clearTimeout(idle); clearTimeout(firstT);
     elEl.textContent = "用时 " + Math.round((Date.now() - t0) / 1000) + "s";
     if (current && current.ctrl === ctrl) { current = null; setBusy(false); } sync();
   }
