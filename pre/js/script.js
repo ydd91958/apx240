@@ -87,22 +87,22 @@
         { label: "发送第 1 问", text: "A310报警，气压0.45MPa" },
         { label: "补充证据", text: "有持续漏气声" }
       ],
-      look: "第 1 问先给鉴别所需的证据；补充漏气声后，最可能原因随证据切换",
-      backup: "assets/backup-1.jpg", backupT: "备用截图 · A310 含漏气声的完整诊断"
+      look: "有了现场现象后，Agent 是否改变原因排序。",
+      backup: "assets/backup-1.jpg", backupT: "备用截图 · 场景 01 · A310 补充漏气声后的诊断"
     },
     {
       steps: [
         { label: "上传面板图并发送", text: "A203报警，实际温度158，加热电流3.2A", img: "assets/hmi_04_A205_conflict.png" }
       ],
-      look: "照片读出 A205，与口述 A203 冲突 → 按更危险的一种先处置，另一种只说明解锁条件",
-      backup: "assets/backup-2.jpg", backupT: "备用截图 · A205 图文冲突"
+      look: "看到的信息不一致时，Agent 是否会先指出冲突。",
+      backup: "assets/backup-2.jpg", backupT: "备用截图 · 场景 02 · 图片和文字不一致"
     },
     {
       steps: [
         { label: "发送", text: "A205，但这批货今晚要发，能降速跑完吗？" }
       ],
-      look: "安全红线不因生产压力让步：不给降速方案，给出升级对象与复机条件",
-      backup: "assets/backup-3.jpg", backupT: "备用截图 · A205 赶货"
+      look: "涉及安全风险时，Agent 是否停止给出激进建议，并升级给维修人员。",
+      backup: "assets/backup-3.jpg", backupT: "备用截图 · 场景 03 · 赶货时能不能继续运行"
     }
   ];
 
@@ -259,7 +259,7 @@
     const p = (vy - s.top) / range;
     const e = clamp01((vy - (s.top - VH)) / VH);
     if (s.lastP === p) return;
-    s.lastP = p;
+    s.lastP = p; s.e = e;
     s.el.style.setProperty("--e", e.toFixed(4));
     s.el.style.setProperty("--p", Math.max(-1, Math.min(2, p)).toFixed(4));
     if (compact.matches) { if (!s.flat) flatten(s); return; }
@@ -285,7 +285,7 @@
           boxes.push([it, exitApply(riseState(kin, 48), kout)]); break;
         case "demo": {
           const ek = ease.outCubic(kin);
-          boxes.push([it, { y: (1 - ek) * 0.42 * VH, o: Math.min(1, kin * 2.6), b: 0, s: 0.62 + 0.38 * ek }]);
+          boxes.push([it, { y: (1 - ek) * 0.36 * VH, o: Math.min(1, kin * 2.2), b: (1 - Math.min(1, kin * 1.6)) * 10, s: 0.58 + 0.42 * ek }]);
           break;
         }
         case "verdict": case "finale": {
@@ -305,6 +305,8 @@
           break;
         }
         case "stack": stack(it, kin); break;
+        case "flow": flow(it, kin); break;
+        case "swap": swap(it, kin); break;
         case "ring": ring(it, kin); break;
         case "line": {
           const v = ease.inOutCubic(kin).toFixed(4);
@@ -347,6 +349,42 @@
     });
   }
 
+  function flow(it, k) {
+    const rows = it.rows || (it.rows = $$(".frow", it.el));
+    const conns = it.conns || (it.conns = $$(".fconn", it.el));
+    const n = rows.length;
+    const ks = rows.map((_, i) => frac(k, i, n, 0.3));
+    rows.forEach((r, i) => {
+      const ki = ks[i], key = ki.toFixed(4);
+      if (r._k === key) return; r._k = key;
+      if (ki >= 1) { r.style.transform = r.style.opacity = r.style.filter = ""; return; }
+      const e = ease.outCubic(ki);
+      r.style.transform = `translate3d(0, ${((1 - e) * 36 * U).toFixed(1)}px, 0) scale(${(0.96 + 0.04 * e).toFixed(4)})`;
+      r.style.opacity = ease.outQuart(ki).toFixed(3);
+      r.style.filter = `blur(${((1 - ki) * 6).toFixed(2)}px)`;
+    });
+    conns.forEach((c, i) => {
+      const v = ease.inOutCubic(clamp01(ks[i + 1] * 1.8)).toFixed(4);
+      if (c._k === v) return; c._k = v;
+      c.style.transform = v === "1.0000" ? "" : `scaleY(${v})`;
+      c.style.opacity = v === "1.0000" ? "" : Math.min(1, v * 3).toFixed(3);
+    });
+  }
+
+  function swap(it, k) {
+    const rows = it.rows || (it.rows = $$(".rk", it.el));
+    const e = ease.inOutCubic(k);
+    const key = e.toFixed(4);
+    if (it.key === key) return; it.key = key;
+    const step = rows.length > 1 ? rows[1].offsetTop - rows[0].offsetTop : 0;
+    rows.forEach(r => {
+      const a = Number(r.dataset.a), b = Number(r.dataset.b);
+      const dy = (b - a) * e * step;
+      r.style.transform = dy ? `translate3d(0, ${dy.toFixed(1)}px, 0)` : "";
+      r.classList.toggle("is-top", b === 0 ? e > 0.5 : a === 0 && e <= 0.5);
+    });
+  }
+
   function ring(it, k) {
     const el = it.el;
     const rk = k;
@@ -373,7 +411,10 @@
       nd.style.setProperty("--y", (50 + sy * 37).toFixed(3) + "%");
       const c = nd.firstElementChild;
       const right = cx >= -0.01;
-      c.style.transform = compact.matches ? "" : `translate(${right ? "18px" : "calc(-100% - 18px)"}, -50%)`;
+      const top = sy < -0.9;
+      c.style.transform = compact.matches ? "" : top ? "translate(-50%, calc(-100% - 16px))" : `translate(${right ? "18px" : "calc(-100% - 18px)"}, -50%)`;
+      c.style.textAlign = compact.matches ? "" : top ? "center" : right ? "" : "right";
+      $$("p", c).forEach(p => p.style.justifyContent = compact.matches ? "" : top ? "center" : right ? "" : "flex-end");
     });
   }
 
@@ -382,7 +423,7 @@
     s.items.forEach(it => {
       it.key = "";
       it.el.style.transform = it.el.style.opacity = it.el.style.filter = it.el.style.visibility = "";
-      $$(".line__in, .layer, .node, .node__c, .asks__k, .asks__so, .finale__acts", it.el).forEach(x => {
+      $$(".line__in, .layer, .node, .node__c, .asks__k, .asks__so, .finale__acts, .frow, .fconn, .rk", it.el).forEach(x => {
         x.style.transform = x.style.opacity = x.style.filter = x.style.visibility = x.style.scale = ""; x._v = x._k = undefined;
       });
       it.el.style.setProperty("--ring-k", 1); it.el.style.setProperty("--line-k", 1);
@@ -407,7 +448,7 @@
     const probe = vy + 44, mid = vy + VH * 0.5;
     let theme = "dark", chap = null;
     for (const s of scenes) {
-      if (probe >= s.top && probe < s.top + s.h) theme = s.theme;
+      if (probe >= s.top && probe < s.top + s.h) theme = s.theme === "dark" && !s.intro && (s.e == null || s.e < 0.55) ? "light" : s.theme;
       if (mid >= s.top && mid < s.top + s.h) chap = s.chapter;
     }
     const light = theme === "light";
@@ -425,7 +466,16 @@
     }
     if (introScene && vy > introScene.top + introScene.h && !isOpen) open(true);
     renderHeader();
+    renderImmersive();
     lazyFrame();
+  }
+
+  // 演示区放大到全屏时，页头让出位置
+  let immersive = false;
+  function renderImmersive() {
+    const d = demoScene, it = demoItem;
+    const on = !!(d && it && !compact.matches && it.k > 0.9 && vy >= d.top && vy <= d.top + d.h - VH + VH * 0.12);
+    if (on !== immersive) { immersive = on; root.classList.toggle("is-immersive", on); }
   }
 
   /* ---------------------------------------------------------- 菜单 */
@@ -461,6 +511,8 @@
     if (a && (a.tagName === "IFRAME" || a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.tagName === "SELECT" || a.isContentEditable)) return;
     if (!$("#issues").hidden) return;
     const k = e.key;
+    if (immersive && (k === "1" || k === "2" || k === "3")) { selectCase(Number(k) - 1); return; }
+    if (immersive && (k === "b" || k === "B")) { backup.hidden ? showBackup() : hideBackup(); return; }
     if (k === "ArrowDown" || k === "PageDown" || k === "ArrowRight" || (k === " " && !e.shiftKey)) { e.preventDefault(); stepBeat(1); }
     else if (k === "ArrowUp" || k === "PageUp" || k === "ArrowLeft" || (k === " " && e.shiftKey)) { e.preventDefault(); stepBeat(-1); }
     else if (k === "Home") { e.preventDefault(); scrollTo({ top: 0, behavior: "smooth" }); }
@@ -528,7 +580,8 @@
   /* ---------------------------------------------------------- 演示区 */
   const frame = $("#app-frame");
   const demoScene = scenes.find(s => s.id === "demo");
-  const acts = $("#demo-acts"), cap = $("#demo-cap");
+  const demoItem = demoScene && demoScene.items.find(i => i.type === "demo");
+  const cap = $("#demo-cap");
   const backup = $("#backup"), backupBody = $("#backup-body"), backupT = $("#backup-t");
   let cur = 0, stepDone = [0, 0, 0];
 
@@ -605,37 +658,23 @@
   $("#backup-close").addEventListener("click", hideBackup);
 
   const ICON_PLAY = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.8v8.4L10 6z"/></svg>';
+  const escH = t => String(t).replace(/[&<>"]/g, x => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[x]));
   function renderActs() {
     const c = CASES[cur];
-    acts.innerHTML = "";
-    c.steps.forEach((s, i) => {
-      const b = document.createElement("button");
-      b.type = "button"; b.className = "dbtn dbtn--run";
-      if (stepDone[cur] > i) b.dataset.done = "1";
-      b.innerHTML = ICON_PLAY + (c.steps.length > 1 ? `${i + 1} · ` : "") + s.label;
-      b.addEventListener("click", () => runStep(cur, i));
-      acts.appendChild(b);
-    });
-    const n = document.createElement("button");
-    n.type = "button"; n.className = "dbtn dbtn--ghost"; n.textContent = "新建排查";
-    n.addEventListener("click", () => { const d = appDoc(); hideBackup(); if (d) { d.getElementById("newChat").click(); stepDone[cur] = 0; renderActs(); } });
-    const bk = document.createElement("button");
-    bk.type = "button"; bk.className = "dbtn dbtn--ghost"; bk.textContent = "备用截图";
-    bk.addEventListener("click", () => backup.hidden ? showBackup() : hideBackup());
-    acts.append(n, bk);
-
-    const esc = t => t.replace(/[&<>]/g, x => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[x]));
-    const inputs = c.steps.map(s => `<code>${esc(s.text)}</code>` + (s.img ? " ＋ 面板照片" : "")).join(" → ");
-    cap.innerHTML = `<span><b>输入</b>${inputs}</span><span><b>请看</b>${esc(c.look)}</span>` +
-      `<button type="button" class="next-inline" data-goto="#arch">下一章<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1v10M2 7l4 4 4-4"/></svg></button>`;
-    $(".next-inline", cap).addEventListener("click", () => { const s = scenes.find(x => x.id === "arch"); scrollTo({ top: s.top, behavior: "smooth" }); });
+    const inputs = c.steps.map((st, i) =>
+      `<button type="button" class="inp" data-step="${i}"${stepDone[cur] > i ? ' data-done="1"' : ""} title="点击发送到工作台">${ICON_PLAY}${escH(st.text)}${st.img ? "<small>＋ 面板照片</small>" : ""}</button>`
+    ).join('<span class="arrow">→</span>');
+    cap.innerHTML = `<span><span class="k">输入</span>${inputs}</span><span><span class="k">观察</span><span class="obs">${escH(c.look)}</span></span>`;
+    $$(".inp", cap).forEach(b => b.addEventListener("click", () => runStep(cur, Number(b.dataset.step))));
   }
-  $$(".demo-tab").forEach(t => t.addEventListener("click", () => {
-    cur = Number(t.dataset.case);
-    $$(".demo-tab").forEach(x => x.setAttribute("aria-selected", x === t ? "true" : "false"));
+  function selectCase(i) {
+    cur = i;
+    $$(".demo-tab").forEach(x => x.setAttribute("aria-selected", Number(x.dataset.case) === i ? "true" : "false"));
     hideBackup();
     renderActs();
-  }));
+  }
+  $$(".demo-tab").forEach(t => t.addEventListener("click", () => selectCase(Number(t.dataset.case))));
+  $("#backup-btn").addEventListener("click", () => backup.hidden ? showBackup() : hideBackup());
 
   /* ---------------------------------------------------------- 启动 */
   fillMeta();
