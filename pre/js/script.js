@@ -132,6 +132,7 @@
   function measure() {
     VH = innerHeight; VW = innerWidth;
     U = Math.min(1.5, Math.max(0.66, Math.min(VW / 1360, VH / 860)));
+    if (heroPhoto) photoW = heroPhoto.offsetWidth || Math.max(VW * 1.08699, VH * 1.7295);
     scenes.forEach(s => {
       const r = s.el.getBoundingClientRect();
       s.top = r.top + scrollY; s.h = s.el.offsetHeight;
@@ -162,7 +163,8 @@
   const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
 
   /* ---------------------------------------------------------- 01 · 镜头 */
-  const heroBadge = $(".hero__badge"), heroSub = $(".hero__subtitle");
+  const heroBadge = $(".hero__badge"), heroSub = $(".hero__subtitle"), heroPhoto = $(".scene__photo");
+  let photoW = 0;
   let introP = -1, moving = false, isOpen = false;
   function renderIntro(s) {
     const range = Math.max(1, s.h - VH);
@@ -171,7 +173,9 @@
     introP = p;
     const st = root.style;
     const q = clamp01(p / 0.86);
-    st.setProperty("--cam-x", lerp(-47.957, -50, q).toFixed(3) + "%");
+    const camX = lerp(-47.957, -50, q);
+    st.setProperty("--cam-x", camX.toFixed(3) + "%");
+    st.setProperty("--beam-dx", (photoW * (camX + 50) / 100).toFixed(1) + "px");
     st.setProperty("--cam-y", lerp(-80.097, -36.716, q).toFixed(3) + "%");
     st.setProperty("--cam-z", reduce.matches ? "1" : (1 + 0.11 * Math.sin(Math.PI * q)).toFixed(4));
 
@@ -308,6 +312,7 @@
           break;
         }
         case "stack": stack(it, kin); break;
+        case "bubbles": bubbles(it, kin); break;
         case "flow": flow(it, kin); break;
         case "swap": swap(it, kin); break;
         case "ring": ring(it, kin); break;
@@ -349,6 +354,44 @@
         l.style.filter = ki < 1 ? `blur(${((1 - ki) * 6).toFixed(2)}px)` : "";
       }
       l.style.setProperty("--link-o", clamp01((k - 0.85) / 0.15).toFixed(3));
+    });
+  }
+
+  function bubbles(it, k) {
+    const plain = it.plain || (it.plain = $$(".bb:not(.bb--key)", it.el));
+    const keys = it.keys || (it.keys = $$(".bb--key", it.el));
+    const k1 = clamp01(k / 0.5), k2 = clamp01((k - 0.5) / 0.5);
+    const n = plain.length;
+    plain.forEach((b, i) => {
+      const ki = frac(k1, i, n, 0.62);
+      const out = ease.inOutCubic(clamp01(k2 * 1.25));
+      const e = ease.outCubic(ki);
+      const o = (ease.outQuart(ki) * (1 - out)).toFixed(3);
+      const sc = (0.86 + 0.14 * e) * (1 - 0.18 * out);
+      const key = o + "|" + sc.toFixed(3);
+      if (b._k === key) return; b._k = key;
+      b.style.transform = `translate(-50%, -50%) scale(${sc.toFixed(3)})`;
+      b.style.opacity = o;
+      b.style.filter = ki < 1 ? `blur(${((1 - ki) * 5).toFixed(2)}px)` : "";
+      b.style.visibility = Number(o) <= 0.01 ? "hidden" : "";
+    });
+    keys.forEach((b, j) => {
+      const kj = clamp01((k2 - j * 0.1) / 0.78);
+      const e = ease.inOutCubic(kj);
+      const key = kj.toFixed(3);
+      if (b._k === key) return; b._k = key;
+      if (!b._p) {
+        const cs = getComputedStyle(b);
+        b._p = ["--x", "--y", "--kx", "--ky"].map(v => parseFloat(cs.getPropertyValue(v)));
+      }
+      const [x, y, kx, ky] = b._p;
+      b.style.left = (x + (kx - x) * e).toFixed(2) + "%";
+      b.style.top = (y + (ky - y) * e).toFixed(2) + "%";
+      b.style.transform = `translate(-50%, -50%) scale(${(0.82 + 0.18 * e).toFixed(3)})`;
+      b.style.opacity = Math.min(1, kj * 2.4).toFixed(3);
+      b.style.visibility = kj <= 0.001 ? "hidden" : "";
+      const em = b.firstElementChild;
+      if (em) em.style.opacity = ease.outCubic(clamp01((kj - 0.72) / 0.28)).toFixed(3);
     });
   }
 
@@ -414,10 +457,14 @@
       nd.style.setProperty("--y", (50 + sy * 37).toFixed(3) + "%");
       const c = nd.firstElementChild;
       const right = cx >= -0.01;
-      const top = sy < -0.9;
-      c.style.transform = compact.matches ? "" : top ? "translate(-50%, calc(-100% - 16px))" : `translate(${right ? "18px" : "calc(-100% - 18px)"}, -50%)`;
-      c.style.textAlign = compact.matches ? "" : top ? "center" : right ? "" : "right";
-      $$("p", c).forEach(p => p.style.justifyContent = compact.matches ? "" : top ? "center" : right ? "" : "flex-end");
+      const top = sy < -0.9, bottom = sy > 0.6;
+      const pos = top ? "translate(-50%, calc(-100% - 16px))"
+        : bottom ? `translate(${right ? "-18%" : "-82%"}, 18px)`
+        : `translate(${right ? "18px" : "calc(-100% - 18px)"}, -50%)`;
+      c.style.transform = compact.matches ? "" : pos;
+      const align = top ? "center" : bottom ? (right ? "left" : "right") : (right ? "" : "right");
+      c.style.textAlign = compact.matches ? "" : align;
+      $$("p", c).forEach(p => p.style.justifyContent = compact.matches ? "" : align === "center" ? "center" : align === "right" ? "flex-end" : "");
     });
   }
 
@@ -426,7 +473,7 @@
     s.items.forEach(it => {
       it.key = "";
       it.el.style.transform = it.el.style.opacity = it.el.style.filter = it.el.style.visibility = "";
-      $$(".line__in, .layer, .node, .node__c, .asks__k, .asks__so, .finale__acts, .frow, .fconn, .rk", it.el).forEach(x => {
+      $$(".line__in, .layer, .node, .node__c, .asks__k, .asks__so, .finale__acts, .frow, .fconn, .rk, .bb, .bb em", it.el).forEach(x => {
         x.style.transform = x.style.opacity = x.style.filter = x.style.visibility = x.style.scale = ""; x._v = x._k = undefined;
       });
       it.el.style.setProperty("--ring-k", 1); it.el.style.setProperty("--line-k", 1);

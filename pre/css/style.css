@@ -173,9 +173,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* ---------- 9. Hero ---------- */
 .hero__content {
-  display: flex; flex-direction: column; align-items: center; gap: calc(30 * var(--u-hero));
+  display: flex; flex-direction: column; align-items: center; gap: calc(40 * var(--u-hero));
   width: calc(820 * var(--u-hero)); max-width: 100%;
-  transform: translateY(calc(var(--hero-out, 0) * -163 * var(--u-hero)));
+  transform: translate(var(--beam-dx, 0px), calc(var(--hero-out, 0) * -163 * var(--u-hero)));
   visibility: var(--hero-vis, visible);
 }
 .hero__badge, .hero__title, .hero__subtitle { opacity: var(--hero-o, 1); filter: var(--hero-filter, none); }
@@ -193,14 +193,14 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .hero__badge-logo { font-weight: 500; font-size: calc(14 * var(--u-ui)); letter-spacing: 0; color: #fff; white-space: nowrap; }
 .hero__title {
   width: 100%; margin: 0; transform: translateX(-0.03em);
-  font-family: var(--font-sans); font-weight: 700; font-size: calc(62 * var(--u-hero));
-  line-height: 1.26; letter-spacing: .02em; text-align: center;
+  font-family: var(--font-sans); font-weight: 700; font-size: calc(60 * var(--u-hero));
+  line-height: 1.42; letter-spacing: .08em; text-align: center;
 }
 .hero__title .line, .verdict .line, .quote .line, .ask .line, .finale .line { display: block; clip-path: inset(-0.35em -0.6em -0.12em -0.6em); }
 .hero__title .line__in { display: block; }
 .hero__subtitle {
   width: calc(560 * var(--u-hero)); max-width: 100%; margin: 0;
-  font-weight: 400; font-size: calc(18 * var(--u-hero)); line-height: 1.8; letter-spacing: 0;
+  font-weight: 400; font-size: calc(17 * var(--u-hero)); line-height: 2.05; letter-spacing: .05em; letter-spacing: 0;
   text-align: center; color: var(--color-text-muted);
 }
 
@@ -477,7 +477,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .tl__s em { display: inline-block; margin-top: calc(16 * var(--u)); font-style: normal; font-size: calc(13 * var(--u)); color: var(--t3); }
 .tl__s--turn em { color: var(--primary); font-weight: 500; }
 .tl__s--ok em { color: var(--t1); font-weight: 500; }
-.tl-line { position: absolute; left: 5px; right: calc(25% - 5px); top: 0; height: 1.5px; background: var(--line-2); }
+.tl-line { position: absolute; left: 5px; right: calc(25% - 30 * var(--u)); top: 0; height: 1.5px; background: var(--line-2); }
 .tl-line span { display: block; height: 100%; width: 100%; background: var(--primary); transform-origin: 0 50%; transform: scaleX(var(--line-k, 0)); }
 .quote { margin: calc(64 * var(--u)) 0 0; }
 .quote p { margin: 0; text-align: center; font-weight: 600; font-size: calc(36 * var(--u)); line-height: 1.55; letter-spacing: .02em; color: var(--t1); }
@@ -597,6 +597,50 @@ body.on-light .hint-keys kbd { background: rgba(15,23,42,.06); color: var(--t2);
 .biz__note { margin: calc(56 * var(--u)) 0 0; text-align: center; font-size: calc(14 * var(--u)); color: var(--t3); }
 .stats { display: block; }
 
+/* ---------- 00 · 三个问题 ---------- */
+.q3 { text-align: center; color: #fff; }
+.q3__k { margin: 0 0 calc(56 * var(--u)); font-size: calc(14 * var(--u)); letter-spacing: .08em; color: rgba(255,255,255,.5); }
+.q3__q { margin: 0 0 calc(40 * var(--u)); font-weight: 600; font-size: calc(38 * var(--u)); line-height: 1.75; letter-spacing: .03em; }
+.q3__q:last-of-type { margin-bottom: 0; }
+.q3__so { margin: calc(56 * var(--u)) 0 0; font-size: calc(17 * var(--u)); line-height: 1.9; color: #BFDBFE; }
+
+/* ---------- 01 · 需求气泡 ---------- */
+.bub { position: relative; height: calc(400 * var(--u)); margin-top: calc(8 * var(--u)); }
+.bb {
+  position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%);
+  padding: calc(10 * var(--u)) calc(18 * var(--u)); border-radius: 999px; background: #fff; color: var(--t2);
+  font-size: calc(15 * var(--u)); white-space: nowrap; box-shadow: 0 0 0 1px var(--line-2), 0 8px 20px rgba(15,23,42,.05);
+}
+.bb--key {
+  background: var(--primary); color: #fff; font-size: calc(21 * var(--u)); font-weight: 600; letter-spacing: .02em;
+  padding: calc(14 * var(--u)) calc(26 * var(--u)); box-shadow: 0 16px 36px rgba(37,99,235,.26); z-index: 3;
+}
+.bb--key em {
+  position: absolute; left: 50%; top: calc(100% + 16px); transform: translateX(-50%);
+  width: calc(270 * var(--u)); white-space: normal; font-style: normal; font-weight: 400;
+  font-size: calc(14.5 * var(--u)); line-height: 1.85; color: var(--t2); text-align: center;
+}
+.bub__so { margin: calc(44 * var(--u)) 0 0; text-align: center; font-size: calc(16 * var(--u)); line-height: 1.85; color: var(--t3); }
+
+/* ---------- 06 · 需要三样东西 ---------- */
+.need { display: flex; flex-direction: column; gap: calc(26 * var(--u)); }
+.need__row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, .66fr); gap: calc(30 * var(--u)); align-items: center; border-top: 1px solid var(--line-2); padding-top: calc(24 * var(--u)); }
+.need__l b { display: block; font-size: calc(22 * var(--u)); font-weight: 600; letter-spacing: .02em; margin-bottom: calc(10 * var(--u)); }
+.need__l span, .need__r span { display: block; font-size: calc(15 * var(--u)); line-height: 1.85; color: var(--t2); }
+.need__arrow { position: relative; width: calc(64 * var(--u)); height: 1.5px; background: linear-gradient(90deg, var(--line-2), var(--primary)); }
+.need__arrow::after { content: ""; position: absolute; right: 0; top: -3px; border-left: 7px solid var(--primary); border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+.need__r { background: var(--tint); border-radius: var(--radius); padding: calc(18 * var(--u)) calc(22 * var(--u)); }
+.need__r b { display: block; font-size: calc(18 * var(--u)); font-weight: 600; color: var(--primary); margin-bottom: calc(6 * var(--u)); }
+
+/* ---------- 06 · 为什么是 Dify ---------- */
+.why { margin: calc(48 * var(--u)) auto 0; max-width: calc(940 * var(--u)); background: var(--deep); color: #fff; border-radius: calc(20 * var(--u)); padding: calc(30 * var(--u)) calc(36 * var(--u)); }
+.why__t { margin: 0 0 calc(12 * var(--u)); font-size: calc(16 * var(--u)); font-weight: 600; color: var(--primary-l); }
+.why__d { margin: 0; font-size: calc(17 * var(--u)); line-height: 1.95; color: rgba(255,255,255,.78); text-wrap: pretty; }
+.why__d b { color: #fff; font-weight: 600; }
+
+.facts--design .fact__no, .facts--gain .fact__no { font-family: var(--font-sans); font-size: calc(14 * var(--u)); font-weight: 600; letter-spacing: .08em; }
+.facts--design { gap: calc(48 * var(--u)); }
+
 /* 中文断行：避免孤字 */
 .lead, .note, .fact__d, .fact__eg, .lim p, .tl__s b { text-wrap: pretty; }
 .h2, .fact__t { text-wrap: balance; }
@@ -660,6 +704,13 @@ body.on-light .hint-keys kbd { background: rgba(15,23,42,.06); color: var(--t2);
   .demo { position: relative; left: auto; right: auto; top: auto; bottom: auto; height: 88svh; width: 100%; }
   .demo-top { flex-direction: column; align-items: stretch; height: auto; }
   .demo-cap { flex-wrap: wrap; gap: 10px; }
+  .q3__q { font-size: clamp(22px, 5.6vw, 30px); }
+  .bub { position: static; height: auto; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .bb { position: static; transform: none !important; opacity: 1 !important; filter: none !important; }
+  .bb--key { width: 100%; white-space: normal; }
+  .bb--key em { position: static; transform: none; width: auto; text-align: left; color: rgba(255,255,255,.85); margin-top: 8px; display: block; }
+  .need__row { grid-template-columns: 1fr; gap: 14px; }
+  .need__arrow { display: none; }
   .close { display: flex; flex-direction: column; gap: 80px; }
   .close > * { grid-area: auto; }
   .colophon { position: relative; bottom: auto; margin-top: 48px; }

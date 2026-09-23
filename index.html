@@ -94,6 +94,9 @@ nav.menu{padding:14px 12px;overflow-y:auto;flex:1}
 /* =====================================================================
    4. 左栏：设备上下文
    ===================================================================== */
+.roleinfo{font-size:12.5px;line-height:1.75;color:var(--text-2)}
+.roleinfo b{display:block;color:var(--text);font-weight:500;margin-bottom:3px}
+.roleinfo .lim{margin-top:6px;color:var(--text-3)}
 .devcard{border:1px solid var(--border);border-radius:var(--r-inner);padding:14px;display:flex;gap:12px;align-items:center}
 .devicon{width:44px;height:44px;border-radius:12px;background:var(--primary-50);color:var(--primary);display:grid;place-items:center;flex-shrink:0}
 .devicon svg{width:22px;height:22px}
@@ -461,6 +464,10 @@ button.vcard:hover{border-color:var(--primary-100);box-shadow:var(--sh-card)}
             <div class="sect">
               <div class="secth">最近排查<span class="sp"></span><span class="tag mock" id="histTag">示例</span></div>
               <div class="hist" id="histBox"></div>
+            </div>
+            <div class="sect">
+              <div class="secth">当前身份可见范围</div>
+              <div class="roleinfo" id="roleInfo"></div>
             </div>
             <div class="sect">
               <div class="secth">资料覆盖</div>
@@ -1047,7 +1054,7 @@ async function send() {
   q.value = ""; autosize(); setHint("");
 
   let query = text || "请识别这张面板照片并诊断";
-  if (role !== "操作工") query += `（我是${role}）`;
+  query = `【提问者角色：${role}】` + query;
 
   const card = addAssistant();
   const waitEl = card.querySelector(".wait"), elEl = card.querySelector(".el"), bodyEl = card.querySelector(".body"), wtxt = card.querySelector(".wtxt");
@@ -1138,7 +1145,26 @@ function newSession() {
 }
 $("newChat").onclick = () => { gotoNav("故障排查"); newSession(); };
 $("restart").onclick = newSession;
-$("roleSel").onchange = e => { role = e.target.value; if (currentView === "系统设置") renderView(currentView); toast(`当前角色已切换为「${e.target.selectedOptions[0].textContent}」`); };
+$("roleSel").onchange = e => applyRole(e.target.value, e.target.selectedOptions[0].textContent);
+const ROLE_VIEW = {
+  "操作工": ["安全动作、现场自查步骤、上报路径", "超出授权的步骤不展开，写成「此项需 XX 人员执行」"],
+  "电气维修": ["电气类完整排查步骤（A203 / A205 / A900 电气项）", "停机锁定挂牌后，可执行对应回路的检查"],
+  "机械维修": ["机械类完整排查步骤（A520 / A101 机械项）", "停机锁定挂牌后，可执行传动与卡阻检查"],
+  "安全员": ["全部排查内容 ＋ 升级矩阵", "A205、A900 的复机需要本人签字确认"]
+};
+function renderRoleInfo() {
+  const v = ROLE_VIEW[role] || ROLE_VIEW["操作工"];
+  const box = $("roleInfo");
+  if (box) box.innerHTML = `<b>${role === "安全员" ? "安全员／主管" : role}</b>${v[0]}<div class="lim">${v[1]}</div>`;
+}
+function applyRole(next, label) {
+  role = next;
+  $("roleSel").value = next;
+  renderRoleInfo();
+  if (currentView === "系统设置") renderView(currentView);
+  newSession();
+  toast(`身份已切换为「${label || next}」，已开始新一轮排查`);
+}
 document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
   $("cols").dataset.pane = b.dataset.pane;
   document.querySelectorAll("#tabs button").forEach(x => x.setAttribute("aria-selected", x === b ? "true" : "false"));
@@ -1392,7 +1418,7 @@ function renderView(name) {
     logs = []; saveLogs(); renderView(currentView); toast("本机排查记录已清空");
   });
   const rs = v.querySelector("#roleSel2");
-  if (rs) rs.onchange = e => { role = e.target.value; $("roleSel").value = role; toast(`当前角色已切换为「${e.target.selectedOptions[0].textContent}」`); };
+  if (rs) rs.onchange = e => applyRole(e.target.value, e.target.selectedOptions[0].textContent);
 }
 document.querySelectorAll("#menu .mitem").forEach(b => b.onclick = () => gotoNav(b.dataset.nav));
 
@@ -1473,6 +1499,7 @@ function encodeWav(samples, rate) {
    L. 启动
    ===================================================================== */
 welcome();
+renderRoleInfo();
 updatePanels();
 autosize();
 </script>

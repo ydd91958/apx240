@@ -115,36 +115,54 @@
     </div>
   </section>
 
-  <!-- ============== 01 · 问题：三个事实 ============== -->
-  <section class="scene scene--sec scene--light" id="findings" data-scene="findings" data-chapter="findings" data-theme="light" data-beats="0,.34,.6,.9" style="--travel:300svh">
+  <!-- ============== 00 · 三个问题 ============== -->
+  <section class="scene scene--sec scene--dark" id="ask0" data-scene="ask0" data-chapter="intro" data-theme="dark" data-beats="0,.28,.52,.76,.95" style="--travel:300svh">
+    <div class="scene__viewport sec">
+      <div class="sheet sheet--dark" aria-hidden="true"><div class="horizon horizon--low"></div><div class="grain"></div></div>
+      <div class="sec__inner q3">
+        <p class="q3__k" data-anim="fade" data-win="-0.3,0">动手之前，我先问了三个问题</p>
+        <p class="q3__q" data-anim="card" data-win=".1,.28">设备报警的那一刻，<br>站在机器前面的是谁？</p>
+        <p class="q3__q" data-anim="card" data-win=".34,.52">他手上有什么？<br>一块面板，一部手机，还有一堆没人翻的资料。</p>
+        <p class="q3__q" data-anim="card" data-win=".58,.76">他要在多久之内，<br>决定停机还是继续？</p>
+        <p class="q3__so" data-anim="fade" data-win=".82,.95">这三个问题的答案，决定了这个 Agent 该做什么、不该做什么。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 01 · 需求拆解 ============== -->
+  <section class="scene scene--sec scene--light" id="findings" data-scene="findings" data-chapter="findings" data-theme="light" data-beats="0,.42,.72,.95" style="--travel:380svh">
     <div class="scene__viewport sec">
       <div class="sheet" aria-hidden="true"><div class="wash"></div></div>
       <div class="sec__inner">
-        <header class="sec-head" data-anim="lead" data-win="-0.35,0">
-          <p class="eyebrow"><span>01</span>现场</p>
-          <h2 class="h2">这台设备真正卡人的地方</h2>
+        <header class="sec-head" data-anim="lead" data-win="-0.35,0|.62,.72">
+          <p class="eyebrow"><span>01</span>需求拆解</p>
+          <h2 class="h2">这个 Agent 设计的真正难点</h2>
+          <p class="lead">把三个问题拆开，现场要它做的事有十几件。<br>但真正决定成败的只有三件。</p>
         </header>
 
-        <div class="facts">
-          <article class="fact" data-anim="card" data-win=".14,.34">
-            <i class="fact__no">01</i>
-            <h3 class="fact__t">报警码不等于原因</h3>
-            <p class="fact__d">同样是 A310 气压低：听得到持续漏气声，是下游接头松动；没有漏气声，是气源滤芯堵塞。</p>
-            <p class="fact__eg">决定怎么修的，是现场补的那一句话，不是屏幕上那个代码。</p>
-          </article>
-          <article class="fact" data-anim="card" data-win=".4,.6">
-            <i class="fact__no">02</i>
-            <h3 class="fact__t">最危险的码，最没有经验</h3>
-            <p class="fact__d">A205 热封温度高是红色等级，必须立即停机；而这台设备上它是 0 条历史案例、0 张维修工单。</p>
-            <p class="fact__eg">越危险的报警，越可能没人处理过。</p>
-          </article>
-          <article class="fact" data-anim="card" data-win=".66,.86">
-            <i class="fact__no">03</i>
-            <h3 class="fact__t">答得对还不够</h3>
-            <p class="fact__d">碰上安全风险，更要紧的是知道什么时候该停手，把事交给有资质的人。</p>
-            <p class="fact__eg">现场那一刻需要的是「立即停机」四个字，不是一段分析。</p>
-          </article>
+        <div class="bub" data-anim="bubbles" data-win=".06,.92">
+          <span class="bb" style="--x:14%;--y:22%">认出报警码</span>
+          <span class="bb" style="--x:36%;--y:13%">读面板照片</span>
+          <span class="bb" style="--x:62%;--y:16%">听懂口语描述</span>
+          <span class="bb" style="--x:84%;--y:26%">多轮追问</span>
+          <span class="bb" style="--x:9%;--y:52%">给出排查步骤</span>
+          <span class="bb" style="--x:30%;--y:44%">判断风险等级</span>
+          <span class="bb" style="--x:70%;--y:46%">决定通知谁</span>
+          <span class="bb" style="--x:90%;--y:56%">复机验证标准</span>
+          <span class="bb" style="--x:20%;--y:78%">区分操作工和维修工</span>
+          <span class="bb" style="--x:46%;--y:84%">资料过期要说明</span>
+          <span class="bb" style="--x:74%;--y:76%">照片和描述打架</span>
+          <span class="bb" style="--x:52%;--y:62%">不会的要敢拒答</span>
+
+          <span class="bb bb--key" style="--x:30%;--y:44%;--kx:17%;--ky:46%">判断风险等级
+            <em>同一个报警码，现场现象不同，原因就不同。证据没到之前不能排序。</em></span>
+          <span class="bb bb--key" style="--x:90%;--y:56%;--kx:83%;--ky:46%">没有先例的报警码
+            <em>A205 是红色等级，必须立即停机，这台设备上却是 0 案例、0 工单。</em></span>
+          <span class="bb bb--key" style="--x:52%;--y:62%;--kx:50%;--ky:46%">什么时候该停手
+            <em>碰上安全红线，重要的不是答得准，是交给有资质的人。</em></span>
         </div>
+
+        <p class="bub__so" data-anim="fade" data-win=".84,.95">后面所有的规则设计，都是围着这三件事做的。</p>
       </div>
     </div>
   </section>
@@ -155,8 +173,8 @@
       <div class="sheet sheet--dark" aria-hidden="true"><div class="horizon"></div><div class="grain"></div></div>
 
       <div class="demo-intro" data-anim="lead" data-win="-0.22,0|.07,.17">
-        <p class="eyebrow eyebrow--dark"><span>02</span>现场演示</p>
-        <h2 class="h1">现场演示</h2>
+        <p class="eyebrow eyebrow--dark"><span>02</span>演示</p>
+        <h2 class="h1">现在，让它上现场</h2>
         <p class="lead lead--dark">三个场景，都在这台真实工作台里现场跑。</p>
       </div>
 
@@ -230,6 +248,42 @@
     </div>
   </section>
 
+  <!-- ============== 03B · 方法：设计思路 ============== -->
+  <section class="scene scene--sec scene--light" id="design" data-scene="design" data-chapter="method" data-theme="light" data-beats="0,.3,.56,.82,.95" style="--travel:330svh">
+    <div class="scene__viewport sec">
+      <div class="sheet sheet--flat" aria-hidden="true"><div class="wash wash--low"></div></div>
+      <div class="sec__inner">
+        <header class="sec-head" data-anim="lead" data-win="-0.35,0">
+          <p class="eyebrow"><span>03</span>我的做法</p>
+          <h2 class="h2">为什么不是一个「会查资料的机器人」</h2>
+        </header>
+
+        <div class="facts facts--design">
+          <article class="fact" data-anim="card" data-win=".1,.3">
+            <i class="fact__no">常见做法</i>
+            <h3 class="fact__t">把资料切片，检索出来给模型参考</h3>
+            <p class="fact__d">模型读到的是几段相关文字，怎么用由它自己决定。</p>
+            <p class="fact__eg">结果是答得像，但不保证能执行：原因可能漏一条，步骤可能少一步，同一个问题两次答得不一样。现场照着做会出事。</p>
+          </article>
+          <article class="fact" data-anim="card" data-win=".34,.56">
+            <i class="fact__no">我的做法</i>
+            <h3 class="fact__t">把资料变成必须遵守的查表规则</h3>
+            <p class="fact__d">可能原因必须逐条对应报警码表；排查顺序照抄步骤表，几步就是几步；通知谁、多久响应，逐字取自升级矩阵。</p>
+            <p class="fact__eg">判断变成查表。模型只做三件事：读懂现场那句话、在规则内排序、说成人话。</p>
+          </article>
+          <article class="fact" data-anim="card" data-win=".6,.82">
+            <i class="fact__no">还差一层</i>
+            <h3 class="fact__t">现场用的入口，也得自己做</h3>
+            <p class="fact__d">手机拍的原图接口直接拒收，还会让这一轮对话彻底卡住；戴着手套的人不方便打字。</p>
+            <p class="fact__eg">所以自己写了工作台：照片在手机上先压到 1.2MB 以内，支持语音输入，排查过程实时可见，身份可切换。</p>
+          </article>
+        </div>
+
+        <p class="bub__so" data-anim="fade" data-win=".86,.95">模型能力决定上限，规则和入口决定能不能上现场。</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ============== 04 · 我做了什么（可量化） ============== -->
   <section class="scene scene--sec scene--light" id="work" data-scene="work" data-chapter="method" data-theme="light" data-beats="0,.32,.56,.82" style="--travel:320svh">
     <div class="scene__viewport sec">
@@ -276,17 +330,17 @@
       <div class="sec__inner">
         <header class="sec-head sec-head--left" data-anim="lead" data-win="-0.3,0">
           <p class="eyebrow"><span>05</span>怎么改到能用</p>
-          <h2 class="h2">一个改了三次才修好的问题</h2>
-          <p class="lead">有一条安全红线规则，总是出现在不该出现的地方。</p>
+          <h2 class="h2">我怎么判断一个问题算真的修好了</h2>
+          <p class="lead">有一条安全红线规则老是被错误引用。前两次我都在加条款，第三次才发现问题不在条款上。</p>
         </header>
 
         <div class="tl-wrap">
           <div class="tl-line" data-anim="line" data-win=".16,.76"><span></span></div>
           <ol class="tl">
-            <li class="tl__s" data-anim="step" data-win=".16,.3"><i></i><small>第一次</small><b>加一条禁止规则</b><em>仍然出现</em></li>
-            <li class="tl__s" data-anim="step" data-win=".32,.46"><i></i><small>第二次</small><b>继续强调这条规则</b><em>仍然出现</em></li>
+            <li class="tl__s" data-anim="step" data-win=".16,.3"><i></i><small>第一次</small><b>加一条禁止规则</b><em>下一轮复现</em></li>
+            <li class="tl__s" data-anim="step" data-win=".32,.46"><i></i><small>第二次</small><b>把这条规则写得更重</b><em>又复现</em></li>
             <li class="tl__s tl__s--turn" data-anim="step" data-win=".48,.62"><i></i><small>回头查数据</small><b>「异常高温」和「A205 热封温度高」，两个定义撞在了一起</b><em>找到原因</em></li>
-            <li class="tl__s tl__s--ok" data-anim="step" data-win=".64,.76"><i></i><small>最后</small><b>把两件事分开：人闻到看到的异常，和仪表读数超限</b><em>不再出现</em></li>
+            <li class="tl__s tl__s--ok" data-anim="step" data-win=".64,.76"><i></i><small>改法</small><b>把两件事分开定义：人闻到看到的异常，和仪表读数超限</b><em>之后再没出现</em></li>
           </ol>
         </div>
 
@@ -294,7 +348,7 @@
           <p><span class="line"><span class="line__in">同一个问题改了两次还复发，</span></span><span class="line"><span class="line__in">说明我修的可能不是根因。</span></span></p>
         </blockquote>
 
-        <p class="stats" data-anim="fade" data-win=".84,.96">还剩 1 项没修完：【已知事实】里偶尔会混进「提问者角色」这类跟设备无关的信息，已经写进已知局限。</p>
+        <p class="stats" data-anim="fade" data-win=".84,.96">从那以后，每个缺陷都要先找到它在数据里的位置，再动规则。42 项问题里 41 项这样闭环，剩下 1 项写进了已知局限。</p>
       </div>
     </div>
   </section>
@@ -330,38 +384,75 @@
     </div>
   </section>
 
-  <!-- ============== 06B · 落地：为什么长在飞书上 ============== -->
-  <section class="scene scene--sec scene--light" id="fs" data-scene="fs" data-chapter="business" data-theme="light" data-beats="0,.32,.56,.82,.95" style="--travel:320svh">
+  <!-- ============== 06B · 落地：它需要一个底座 ============== -->
+  <section class="scene scene--sec scene--light" id="fs" data-scene="fs" data-chapter="business" data-theme="light" data-beats="0,.3,.54,.78,.95" style="--travel:340svh">
     <div class="scene__viewport sec">
       <div class="sheet" aria-hidden="true"><div class="wash"></div></div>
       <div class="sec__inner">
         <header class="sec-head" data-anim="lead" data-win="-0.35,0">
           <p class="eyebrow"><span>06</span>落地</p>
-          <h2 class="h2">这件事，适合长在飞书上</h2>
+          <h2 class="h2">它要真的跑起来，需要三样东西</h2>
+          <p class="lead">一个聊天框给不出这三样。这也是它为什么必须长在一套协同系统上。</p>
         </header>
 
-        <div class="facts facts--biz">
-          <article class="fact" data-anim="card" data-win=".12,.32">
-            <i class="fact__no">对现场</i>
-            <h3 class="fact__t">流程不用换地方</h3>
-            <p class="fact__d">升级通知发消息，复机走审批，维修记录回填多维表格——这些本来就在飞书里做。</p>
-            <p class="fact__eg">工厂不必为一个 AI 再养一套新系统，现场也不用多学一个入口。</p>
+        <div class="need">
+          <div class="need__row" data-anim="card" data-win=".08,.3">
+            <div class="need__l"><b>设备资料要有地方存</b><span>报警码、正常参数、历史案例、维修工单，一台设备 8 张表，而且要有人持续维护。</span></div>
+            <div class="need__arrow" aria-hidden="true"></div>
+            <div class="need__r"><b>飞书多维表格</b><span>结构化、能多人维护、能被自动化读写</span></div>
+          </div>
+          <div class="need__row" data-anim="card" data-win=".32,.54">
+            <div class="need__l"><b>升级通知要送到具体的人</b><span>谁该来、多久到场、工单什么紧急度，都要从表里查出来，再真的发出去。</span></div>
+            <div class="need__arrow" aria-hidden="true"></div>
+            <div class="need__r"><b>飞书消息</b><span>人在哪、群在哪，通知就发到哪</span></div>
+          </div>
+          <div class="need__row" data-anim="card" data-win=".56,.78">
+            <div class="need__l"><b>复机要有人签字放行</b><span>A205 和 A900 在这台设备上没有复机先例，必须安全员或控制专家确认才能开机。</span></div>
+            <div class="need__arrow" aria-hidden="true"></div>
+            <div class="need__r"><b>飞书审批</b><span>谁批的、什么时候批的，留痕可查</span></div>
+          </div>
+        </div>
+
+        <p class="bub__so" data-anim="fade" data-win=".84,.95">少了这三样，它只是一个能聊天的页面，进不了车间的流程。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 06C · 落地：飞书收什么 ============== -->
+  <section class="scene scene--sec scene--light" id="fs2" data-scene="fs2" data-chapter="business" data-theme="light" data-beats="0,.3,.54,.78,.95" style="--travel:340svh">
+    <div class="scene__viewport sec">
+      <div class="sheet sheet--flat" aria-hidden="true"><div class="wash wash--low"></div></div>
+      <div class="sec__inner">
+        <header class="sec-head" data-anim="lead" data-win="-0.35,0">
+          <p class="eyebrow"><span>06</span>落地</p>
+          <h2 class="h2">一台设备接进来，飞书多了什么</h2>
+        </header>
+
+        <div class="facts facts--gain">
+          <article class="fact" data-anim="card" data-win=".08,.3">
+            <i class="fact__no">人</i>
+            <h3 class="fact__t">用飞书的人从办公室扩到车间</h3>
+            <p class="fact__d">维修工、班组长、安全员因为报警进来，每天都要用。</p>
+            <p class="fact__eg">口径：账号数随一线人数增长，而不是随管理岗位增长。</p>
           </article>
-          <article class="fact" data-anim="card" data-win=".36,.56">
-            <i class="fact__no">对飞书</i>
-            <h3 class="fact__t">从沟通，走进生产流程</h3>
-            <p class="fact__d">设备知识表、工单、审批记录都沉在多维表格和审批流里，越用越厚。</p>
-            <p class="fact__eg">这类场景带来的不只是消息量，而是把飞书接进了工厂每天必须跑的那条流程。</p>
+          <article class="fact" data-anim="card" data-win=".32,.54">
+            <i class="fact__no">数据</i>
+            <h3 class="fact__t">多维表格里装的是生产数据</h3>
+            <p class="fact__d">一台设备 8 张知识表，加上每次维修的工单和复机记录，越用越厚。</p>
+            <p class="fact__eg">口径：表的数量随设备台数线性增长，一条产线就是几十台。</p>
           </article>
-          <article class="fact" data-anim="card" data-win=".6,.8">
-            <i class="fact__no">对交付</i>
-            <h3 class="fact__t">8 张表就是一份模板</h3>
-            <p class="fact__d">同型号设备换表里的数据，规则逻辑不动；换一类新设备，照模板重填一遍。</p>
-            <p class="fact__eg">交付团队和生态伙伴可以照着复制到下一家工厂，单客户的交付成本会一次比一次低。</p>
+          <article class="fact" data-anim="card" data-win=".56,.78">
+            <i class="fact__no">AI</i>
+            <h3 class="fact__t">Agent 本身可以变成飞书的收入</h3>
+            <p class="fact__d">飞书 aily 能接多维表格和文档做知识源，也能把 Agent 发到飞书聊天里。</p>
+            <p class="fact__eg">口径：调用量随报警次数走，报警是每天都会发生的事。</p>
           </article>
         </div>
 
-        <p class="biz__note" data-anim="fade" data-win=".84,.95">这三条是我的判断，还没有客户数据支撑，要在试点里验证。</p>
+        <div class="why" data-anim="card" data-win=".82,.95">
+          <p class="why__t">那为什么这次用 Dify？</p>
+          <p class="why__d">两天内要拿出能打开、能演示的东西，它是当时最快的路。但这个项目值钱的是那 8 张表、那套诊断规则和 12 个回归用例——换个平台，它们还在。<b>规则搬到飞书 aily 照样跑，换的是运行的地方，不是逻辑。</b></p>
+        </div>
       </div>
     </div>
   </section>
