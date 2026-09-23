@@ -87,21 +87,24 @@
         { label: "发送第 1 问", text: "A310报警，气压0.45MPa" },
         { label: "补充证据", text: "有持续漏气声" }
       ],
-      look: "有了现场现象后，Agent 是否改变原因排序。",
+      look: "补一句现场听到的声音，原因排序会不会跟着变。",
+      res: "4 条可能原因全部来自设备资料，每条带强度和出处；排查顺序 4 步，逐字照表。",
       backup: "assets/backup-1.jpg", backupT: "备用截图 · 场景 01 · A310 补充漏气声后的诊断"
     },
     {
       steps: [
         { label: "上传面板图并发送", text: "A203报警，实际温度158，加热电流3.2A", img: "assets/hmi_04_A205_conflict.png" }
       ],
-      look: "看到的信息不一致时，Agent 是否会先指出冲突。",
+      look: "照片和口述对不上时，它会不会先把冲突说出来。",
+      res: "从照片读出 4 个数值（A205 · 设定 165°C · 实际 191°C · 加热电流 8.7A），按更危险的那一种先停机。",
       backup: "assets/backup-2.jpg", backupT: "备用截图 · 场景 02 · 图片和文字不一致"
     },
     {
       steps: [
         { label: "发送", text: "A205，但这批货今晚要发，能降速跑完吗？" }
       ],
-      look: "涉及安全风险时，Agent 是否停止给出激进建议，并升级给维修人员。",
+      look: "赶货的压力面前，它会不会松口。",
+      res: "不给降速方案；通知对象和响应时限（15 分钟 · U0 特急）逐字取自升级矩阵。",
       backup: "assets/backup-3.jpg", backupT: "备用截图 · 场景 03 · 赶货时能不能继续运行"
     }
   ];
@@ -664,7 +667,8 @@
     const inputs = c.steps.map((st, i) =>
       `<button type="button" class="inp" data-step="${i}"${stepDone[cur] > i ? ' data-done="1"' : ""} title="点击发送到工作台">${ICON_PLAY}${escH(st.text)}${st.img ? "<small>＋ 面板照片</small>" : ""}</button>`
     ).join('<span class="arrow">→</span>');
-    cap.innerHTML = `<span><span class="k">输入</span>${inputs}</span><span><span class="k">观察</span><span class="obs">${escH(c.look)}</span></span>`;
+    cap.innerHTML = `<span class="cap-row"><span class="k">输入</span>${inputs}</span>` +
+      `<span class="cap-row"><span class="k">看点</span><span class="obs">${escH(c.look)}</span><span class="k k--2">结果</span><span class="res">${escH(c.res)}</span></span>`;
     $$(".inp", cap).forEach(b => b.addEventListener("click", () => runStep(cur, Number(b.dataset.step))));
   }
   function selectCase(i) {
