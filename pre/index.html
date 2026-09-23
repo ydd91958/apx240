@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<script>document.documentElement.classList.add('js')</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>APX-240 · 现场故障排查助手</title>
+<meta name="description" content="APX-240 现场故障排查助手：把一台设备的说明书、历史案例和维修工单，整理成现场照着就能做的排查路径。">
+<meta name="theme-color" content="#0F172A">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preload" as="image" href="assets/hero.jpg">
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/sans-400.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/sans-700.woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<a class="skip" href="#top">跳到正文</a>
+
+<!-- ============================ Header ============================ -->
+<header class="site-header" id="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="#top" aria-label="APX-240 回到开头">
+      <img class="brand__mark" src="assets/mark.svg" alt="" aria-hidden="true">
+      <span class="brand__name">APX-240</span>
+    </a>
+
+    <nav class="nav" aria-label="章节">
+      <a class="nav__link" href="#findings" data-chapter="findings">现场</a>
+      <a class="nav__link" href="#demo" data-chapter="demo">演示</a>
+      <a class="nav__link" href="#arch" data-chapter="method">方法</a>
+      <a class="nav__link" href="#iter" data-chapter="iter">迭代</a>
+      <a class="nav__link" href="#loop" data-chapter="business">落地</a>
+      <a class="nav__link" href="#close" data-chapter="close">边界</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="button button--ghost" href="../" target="_blank" rel="noopener">工作台<svg class="ext" viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1h6v6M9 1 1 9"/></svg></a>
+      <a class="button button--solid" href="#demo">进入现场排查</a>
+    </div>
+
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="菜单">
+      <span></span><span></span>
+    </button>
+  </div>
+
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    <a class="mobile-menu__link" href="#findings">现场</a>
+    <a class="mobile-menu__link" href="#demo">演示</a>
+    <a class="mobile-menu__link" href="#arch">方法</a>
+    <a class="mobile-menu__link" href="#iter">迭代</a>
+    <a class="mobile-menu__link" href="#loop">落地</a>
+    <a class="mobile-menu__link" href="#close">边界</a>
+    <div class="mobile-menu__actions">
+      <a class="button button--ghost" href="../" target="_blank" rel="noopener">工作台</a>
+      <a class="button button--solid" href="#demo">进入现场排查</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============== 首屏：一张图上的一次镜头运动 ============== -->
+  <section class="scene" id="intro" data-scene="intro" data-chapter="intro" data-theme="dark" data-beats="0,1">
+    <div class="scene__viewport">
+      <div class="scene__backdrop" aria-hidden="true">
+        <div class="scene__camera"><img class="scene__photo" src="assets/hero.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="high"></div>
+        <div class="scene__glow"></div>
+        <div class="grain"></div>
+      </div>
+
+      <div class="hero__content">
+        <div class="hero__badge">
+          <div class="hero__badge-row">
+            <span class="hero__badge-label">APX-240</span>
+            <span class="hero__badge-logo">现场故障排查助手</span>
+          </div>
+        </div>
+        <h1 class="hero__title">
+          <span class="line"><span class="line__in">AI 落地最难的部分，</span></span>
+          <span class="line"><span class="line__in">从来不在模型。</span></span>
+        </h1>
+        <p class="hero__subtitle">一台设备的说明书、历史案例和维修工单，<br>整理成现场照着就能做的排查路径。</p>
+      </div>
+
+      <div class="platform__content">
+        <div class="pill"><span class="pill__dot"></span>已上线 · 覆盖 7 个报警码 · 平均 15 秒出结果</div>
+        <h2 class="platform__title">一张诊断卡，<br>现场照着做就行</h2>
+        <div class="shot">
+          <div class="shot__window">
+            <div class="shot__toolbar" aria-hidden="true">
+              <span class="tl"><i></i><i></i><i></i></span>
+              <svg class="tb tb--side" viewBox="0 0 14 11"><rect x=".5" y=".5" width="13" height="10" rx="2"/><path d="M5 .5v10"/></svg>
+              <span class="tb-hist"><svg viewBox="0 0 8 12"><path d="M6.5 1 1.5 6l5 5"/></svg><svg viewBox="0 0 8 12"><path d="M1.5 1 6.5 6l-5 5"/></svg></span>
+              <span class="addr">
+                <svg class="addr__shield" viewBox="0 0 10 12"><path d="M5 .6 9.4 2.3v3.6c0 2.7-1.9 4.6-4.4 5.5C2.5 10.5.6 8.6.6 5.9V2.3z"/></svg>
+                <span class="addr__plate"><span class="addr__in"><svg viewBox="0 0 6 8"><rect x=".5" y="3.3" width="5" height="4.2" rx=".8"/><path d="M1.6 3.3V2.2a1.4 1.4 0 0 1 2.8 0v1.1"/></svg><span class="addr__url" data-url>apx240 · github.io</span></span>
+                  <svg class="addr__reload" viewBox="0 0 8 9"><path d="M6.9 4.9A3 3 0 1 1 6 2.4M6.4.8 6.1 2.6l-1.8-.2"/></svg></span>
+              </span>
+              <span class="tb-tools"><svg viewBox="0 0 12 12"><path d="M6 1v7M3 5.5 6 8.5l3-3M1.5 10.8h9"/></svg><svg viewBox="0 0 12 12"><path d="M6 8V1M3.5 3.3 6 .8l2.5 2.5M2 5.5v5.3h8V5.5"/></svg><svg viewBox="0 0 12 12"><path d="M6 1.5v9M1.5 6h9"/></svg><svg viewBox="0 0 12 12"><rect x="1" y="3" width="8" height="8" rx="1.5"/><path d="M3.5 1h6A1.5 1.5 0 0 1 11 2.5v6"/></svg></span>
+            </div>
+            <img class="shot__screen" src="assets/shot.jpg" alt="APX-240 现场排查工作台：左侧设备信息，中间诊断卡，右侧排查过程" loading="lazy" decoding="async">
+          </div>
+
+          <!-- 浮出的诊断卡 -->
+          <div class="dx" aria-label="诊断卡示例">
+            <div class="dx__head"><span class="dx__code">A310</span><span class="dx__name">气压低</span></div>
+            <div class="dx__val"><b>0.45</b><span>MPa</span></div>
+            <p class="dx__ref">正常范围 0.55–0.70 MPa</p>
+            <div class="dx__row"><span>现场现象</span><b>持续漏气声</b></div>
+            <div class="dx__row dx__row--em"><span>初步判断</span><b>下游管路泄漏</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 01 · 问题：三个事实 ============== -->
+  <section class="scene scene--sec scene--light" id="findings" data-scene="findings" data-chapter="findings" data-theme="light" data-beats="0,.34,.6,.9" style="--travel:300svh">
+    <div class="scene__viewport sec">
+      <div class="sheet" aria-hidden="true"><div class="wash"></div></div>
+      <div class="sec__inner">
+        <header class="sec-head" data-anim="lead" data-win="-0.35,0">
+          <p class="eyebrow"><span>01</span>现场</p>
+          <h2 class="h2">这台设备真正卡人的地方</h2>
+        </header>
+
+        <div class="facts">
+          <article class="fact" data-anim="card" data-win=".14,.34">
+            <i class="fact__no">01</i>
+            <h3 class="fact__t">报警码不等于原因</h3>
+            <p class="fact__d">同样是 A310 气压低：听得到持续漏气声，是下游接头松动；没有漏气声，是气源滤芯堵塞。</p>
+            <p class="fact__eg">决定怎么修的，是现场补的那一句话，不是屏幕上那个代码。</p>
+          </article>
+          <article class="fact" data-anim="card" data-win=".4,.6">
+            <i class="fact__no">02</i>
+            <h3 class="fact__t">最危险的码，最没有经验</h3>
+            <p class="fact__d">A205 热封温度高是红色等级，必须立即停机；而这台设备上它是 0 条历史案例、0 张维修工单。</p>
+            <p class="fact__eg">越危险的报警，越可能没人处理过。</p>
+          </article>
+          <article class="fact" data-anim="card" data-win=".66,.86">
+            <i class="fact__no">03</i>
+            <h3 class="fact__t">答得对还不够</h3>
+            <p class="fact__d">碰上安全风险，更要紧的是知道什么时候该停手，把事交给有资质的人。</p>
+            <p class="fact__eg">现场那一刻需要的是「立即停机」四个字，不是一段分析。</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 02 · 演示：真实工作台 ============== -->
+  <section class="scene scene--sec scene--dark" id="demo" data-scene="demo" data-chapter="demo" data-theme="dark" data-beats="0,.27,.39,.51,.63,1" style="--travel:380svh">
+    <div class="scene__viewport sec">
+      <div class="sheet sheet--dark" aria-hidden="true"><div class="horizon"></div><div class="grain"></div></div>
+
+      <div class="demo-intro" data-anim="lead" data-win="-0.22,0|.07,.17">
+        <p class="eyebrow eyebrow--dark"><span>02</span>现场演示</p>
+        <h2 class="h1">现场演示</h2>
+        <p class="lead lead--dark">三个场景，都在这台真实工作台里现场跑。</p>
+      </div>
+
+      <!-- 场景 01 的前奏：证据一条条出现 -->
+      <div class="chain" data-anim="fade" data-win=".12,.18|.68,.76">
+        <p class="chain__k">场景 01 · A310 低压报警</p>
+        <ol class="chain__row">
+          <li class="ch" data-anim="card" data-win=".17,.27"><small>报警</small><b>A310</b><span>气压低</span></li>
+          <li class="ch" data-anim="card" data-win=".29,.39"><small>读数</small><b>0.45 <em>MPa</em></b><span>正常范围 0.55–0.70 MPa</span></li>
+          <li class="ch" data-anim="card" data-win=".41,.51"><small>现场现象</small><b>持续漏气声</b><span>由现场人员补充</span></li>
+          <li class="ch ch--rank" data-anim="card" data-win=".51,.57">
+            <small>原因排序</small>
+            <div class="rank" data-anim="swap" data-win=".57,.63">
+              <div class="rk" data-a="0" data-b="1"><i></i>气源滤芯堵塞</div>
+              <div class="rk rk--hit" data-a="1" data-b="0"><i></i>下游管路泄漏</div>
+            </div>
+            <span>有了漏气声，排在第一的原因就换了</span>
+          </li>
+        </ol>
+      </div>
+
+      <!-- 真实工作台 -->
+      <div class="demo" data-anim="demo" data-win=".7,.92">
+        <div class="demo-top" data-anim="fade" data-win=".84,.96">
+          <div class="demo-tabs" role="tablist" aria-label="演示场景">
+            <button type="button" role="tab" class="demo-tab" data-case="0" aria-selected="true"><i>01</i>A310 · 证据改变判断</button>
+            <button type="button" role="tab" class="demo-tab" data-case="1" aria-selected="false"><i>02</i>A205 · 图片和文字不一致</button>
+            <button type="button" role="tab" class="demo-tab" data-case="2" aria-selected="false"><i>03</i>A205 · 赶货时能不能继续运行？</button>
+          </div>
+          <div class="demo-links">
+            <button type="button" class="tlink" id="backup-btn">备用截图</button>
+            <a class="tlink tlink--strong" href="../" target="_blank" rel="noopener">新窗口打开 ↗</a>
+          </div>
+        </div>
+
+        <div class="frame">
+          <iframe id="app-frame" title="APX-240 现场排查工作台（实时）" data-src="../" allow="microphone; camera; clipboard-write"></iframe>
+          <div class="backup" id="backup" hidden>
+            <div class="backup__bar"><span id="backup-t">备用截图</span><button type="button" class="backup__x" id="backup-close">返回实时工作台</button></div>
+            <div class="backup__body" id="backup-body"></div>
+          </div>
+        </div>
+
+        <div class="demo-cap" id="demo-cap" data-anim="fade" data-win=".86,.98"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 03 · 方法 ============== -->
+  <section class="scene scene--sec scene--light" id="arch" data-scene="arch" data-chapter="method" data-theme="light" data-beats="0,.55,.9" style="--travel:240svh">
+    <div class="scene__viewport sec">
+      <div class="sheet" aria-hidden="true"><div class="wash"></div></div>
+      <div class="sec__inner split">
+        <header class="sec-head sec-head--side" data-anim="lead" data-win="-0.35,0">
+          <p class="eyebrow"><span>03</span>我的做法</p>
+          <h2 class="h2">先有规则，再有回答。</h2>
+          <p class="lead">说明书、历史案例、维修记录，先整理成排查时必须遵守的规则；模型只负责读懂现场那句话，然后按规则作答。</p>
+          <p class="note" data-anim="fade" data-win=".7,.9">规则写在提示词里，没有单独的规则引擎，模型也没有做额外训练。</p>
+        </header>
+
+        <div class="flow" data-anim="flow" data-win=".04,.55">
+          <div class="frow frow--src"><span>说明书</span><i>+</i><span>历史案例</span><i>+</i><span>维修记录</span></div>
+          <div class="fconn"></div>
+          <div class="frow frow--rule"><b>排查规则</b><small>报警码对应哪些原因 · 读数多少算异常 · 什么情况必须停机 · 该通知谁</small></div>
+          <div class="fconn"></div>
+          <div class="frow frow--agent"><b>Agent</b><small>读懂现场那句话，按规则判断</small></div>
+          <div class="fconn"></div>
+          <div class="frow frow--out"><span>原因判断</span><span>排查步骤</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 04 · 我做了什么（可量化） ============== -->
+  <section class="scene scene--sec scene--light" id="work" data-scene="work" data-chapter="method" data-theme="light" data-beats="0,.32,.56,.82" style="--travel:320svh">
+    <div class="scene__viewport sec">
+      <div class="sheet sheet--flat" aria-hidden="true"><div class="wash wash--low"></div></div>
+      <div class="sec__inner">
+        <header class="sec-head" data-anim="lead" data-win="-0.35,0">
+          <p class="eyebrow"><span>04</span>我做了什么</p>
+          <h2 class="h2">一份设备资料，做成一个能上线的助手</h2>
+        </header>
+
+        <div class="facts facts--work">
+          <article class="wk" data-anim="card" data-win=".12,.32">
+            <h3 class="wk__t">整理规则</h3>
+            <div class="wk__n"><b data-count="8">8</b><span>张知识表</span></div>
+            <p class="wk__d">报警码 · 安全红线 · 正常参数 · 历史案例 · 维修工单 · 升级矩阵 · 鉴别诊断 · 冲突归因</p>
+            <div class="wk__n"><b>2.4</b><span>万字提示词 · 十段结构</span></div>
+            <p class="wk__d">v3.0 到 v3.8.2 共 9 个版本，现已封版。</p>
+          </article>
+
+          <article class="wk" data-anim="card" data-win=".36,.56">
+            <h3 class="wk__t">测试和修复</h3>
+            <div class="wk__n"><b data-count="12">12</b><span>个测试用例 · 9 轮回归</span></div>
+            <p class="wk__d">覆盖文字、图片两种输入，以及安全红线、零历史案例、通信中断、生产压力等场景。</p>
+            <div class="wk__n"><b data-count-issues>—</b><span>项问题已关闭（共 42 项）</span></div>
+            <p class="wk__d">每一项都记着当时的现象、根因，以及改了哪一条规则。<button type="button" class="tlink tlink--blue" id="issues-open">查看清单 →</button></p>
+          </article>
+
+          <article class="wk" data-anim="card" data-win=".6,.8">
+            <h3 class="wk__t">现场入口</h3>
+            <div class="wk__n"><b data-count="3">3</b><span>种输入：文字 · 照片 · 语音</span></div>
+            <p class="wk__d">手机照片先在浏览器里压到长边 1600、1.2MB 以内。原图直接传会被接口拒绝，而且这轮对话之后都发不出去。</p>
+            <div class="wk__n"><b data-count="50">50</b><span>项自动化检查</span></div>
+            <p class="wk__d">工作台是我自己写的单页，已经部署，手机打开就能用。</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 05 · 迭代 ============== -->
+  <section class="scene scene--sec scene--light" id="iter" data-scene="iter" data-chapter="iter" data-theme="light" data-beats="0,.3,.46,.62,.76,.94" style="--travel:340svh">
+    <div class="scene__viewport sec">
+      <div class="sheet sheet--flat" aria-hidden="true"><div class="wash wash--low"></div></div>
+      <div class="sec__inner">
+        <header class="sec-head sec-head--left" data-anim="lead" data-win="-0.3,0">
+          <p class="eyebrow"><span>05</span>怎么改到能用</p>
+          <h2 class="h2">一个改了三次才修好的问题</h2>
+          <p class="lead">有一条安全红线规则，总是出现在不该出现的地方。</p>
+        </header>
+
+        <div class="tl-wrap">
+          <div class="tl-line" data-anim="line" data-win=".16,.76"><span></span></div>
+          <ol class="tl">
+            <li class="tl__s" data-anim="step" data-win=".16,.3"><i></i><small>第一次</small><b>加一条禁止规则</b><em>仍然出现</em></li>
+            <li class="tl__s" data-anim="step" data-win=".32,.46"><i></i><small>第二次</small><b>继续强调这条规则</b><em>仍然出现</em></li>
+            <li class="tl__s tl__s--turn" data-anim="step" data-win=".48,.62"><i></i><small>回头查数据</small><b>「异常高温」和「A205 热封温度高」，两个定义撞在了一起</b><em>找到原因</em></li>
+            <li class="tl__s tl__s--ok" data-anim="step" data-win=".64,.76"><i></i><small>最后</small><b>把两件事分开：人闻到看到的异常，和仪表读数超限</b><em>不再出现</em></li>
+          </ol>
+        </div>
+
+        <blockquote class="quote" data-anim="verdict" data-win=".8,.94">
+          <p><span class="line"><span class="line__in">同一个问题改了两次还复发，</span></span><span class="line"><span class="line__in">说明我修的可能不是根因。</span></span></p>
+        </blockquote>
+
+        <p class="stats" data-anim="fade" data-win=".84,.96">还剩 1 项没修完：【已知事实】里偶尔会混进「提问者角色」这类跟设备无关的信息，已经写进已知局限。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 05A · 落地：一次故障的完整流程 ============== -->
+  <section class="scene scene--sec scene--light" id="loop" data-scene="loop" data-chapter="business" data-theme="light" data-beats="0,.5,.94" style="--travel:300svh">
+    <div class="scene__viewport sec">
+      <div class="sheet" aria-hidden="true"><div class="wash"></div></div>
+      <div class="sec__inner split split--loop">
+        <header class="sec-head sec-head--side" data-anim="lead" data-win="-0.35,0">
+          <p class="eyebrow"><span>06</span>落地</p>
+          <h2 class="h2">一次故障结束后，<br>经验不能跟着人一起离开。</h2>
+          <p class="lead">维修结果回到记录里，下一次遇到同样的故障，可以直接照着用。</p>
+          <div class="legend" data-anim="fade" data-win=".78,.92"><span><i class="st st--on"></i>已实现</span><span><i class="st st--plan"></i>下一步产品化</span></div>
+          <p class="note" data-anim="fade" data-win=".8,.94">这一圈里，只有诊断和处置是 AI 做的；通知、审批、记录都要落到人和系统上。</p>
+        </header>
+
+        <div class="ring" data-anim="ring" data-win=".05,.85">
+          <svg class="ring__svg" viewBox="0 0 600 600" aria-hidden="true">
+            <circle class="ring__track" cx="300" cy="300" r="222"/>
+            <circle class="ring__draw" cx="300" cy="300" r="222" pathLength="1"/>
+          </svg>
+          <div class="ring__hub" data-anim="fade" data-win=".62,.85"><b>一次故障</b><span>从报修，到下一次能复用</span></div>
+          <div class="node" style="--a:-90deg"><div class="node__c"><b>报修</b><p><i class="st st--on"></i>文字、照片、语音</p></div></div>
+          <div class="node" style="--a:-38.57deg"><div class="node__c"><b>诊断</b><p><i class="st st--on"></i>给出原因和证据来源</p></div></div>
+          <div class="node" style="--a:12.86deg"><div class="node__c"><b>处置</b><p><i class="st st--on"></i>排查步骤和停机条件</p></div></div>
+          <div class="node" style="--a:64.29deg"><div class="node__c"><b>升级</b><p><i class="st st--on"></i>写明通知谁、多久响应</p><p><i class="st st--plan"></i>自动推送飞书消息</p></div></div>
+          <div class="node" style="--a:115.71deg"><div class="node__c"><b>复机</b><p><i class="st st--on"></i>复机检查标准</p><p><i class="st st--plan"></i>飞书审批签字</p></div></div>
+          <div class="node" style="--a:167.14deg"><div class="node__c"><b>维修记录</b><p><i class="st st--plan"></i>自动写入多维表格</p></div></div>
+          <div class="node" style="--a:218.57deg"><div class="node__c"><b>知识更新</b><p><i class="st st--on"></i>资料在多维表格维护</p><p><i class="st st--plan"></i>维修结果自动回流</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 06B · 落地：为什么长在飞书上 ============== -->
+  <section class="scene scene--sec scene--light" id="fs" data-scene="fs" data-chapter="business" data-theme="light" data-beats="0,.32,.56,.82,.95" style="--travel:320svh">
+    <div class="scene__viewport sec">
+      <div class="sheet" aria-hidden="true"><div class="wash"></div></div>
+      <div class="sec__inner">
+        <header class="sec-head" data-anim="lead" data-win="-0.35,0">
+          <p class="eyebrow"><span>06</span>落地</p>
+          <h2 class="h2">这件事，适合长在飞书上</h2>
+        </header>
+
+        <div class="facts facts--biz">
+          <article class="fact" data-anim="card" data-win=".12,.32">
+            <i class="fact__no">对现场</i>
+            <h3 class="fact__t">流程不用换地方</h3>
+            <p class="fact__d">升级通知发消息，复机走审批，维修记录回填多维表格——这些本来就在飞书里做。</p>
+            <p class="fact__eg">工厂不必为一个 AI 再养一套新系统，现场也不用多学一个入口。</p>
+          </article>
+          <article class="fact" data-anim="card" data-win=".36,.56">
+            <i class="fact__no">对飞书</i>
+            <h3 class="fact__t">从沟通，走进生产流程</h3>
+            <p class="fact__d">设备知识表、工单、审批记录都沉在多维表格和审批流里，越用越厚。</p>
+            <p class="fact__eg">这类场景带来的不只是消息量，而是把飞书接进了工厂每天必须跑的那条流程。</p>
+          </article>
+          <article class="fact" data-anim="card" data-win=".6,.8">
+            <i class="fact__no">对交付</i>
+            <h3 class="fact__t">8 张表就是一份模板</h3>
+            <p class="fact__d">同型号设备换表里的数据，规则逻辑不动；换一类新设备，照模板重填一遍。</p>
+            <p class="fact__eg">交付团队和生态伙伴可以照着复制到下一家工厂，单客户的交付成本会一次比一次低。</p>
+          </article>
+        </div>
+
+        <p class="biz__note" data-anim="fade" data-win=".84,.95">这三条是我的判断，还没有客户数据支撑，要在试点里验证。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 06C · 落地：ROI ============== -->
+  <section class="scene scene--sec scene--light" id="value" data-scene="value" data-chapter="business" data-theme="light" data-beats="0,.46,.9" style="--travel:240svh">
+    <div class="scene__viewport sec">
+      <div class="sheet sheet--flat" aria-hidden="true"><div class="wash wash--low"></div></div>
+      <div class="sec__inner roi">
+        <header class="sec-head" data-anim="lead" data-win="-0.35,0">
+          <p class="eyebrow"><span>06</span>值不值得做</p>
+          <h2 class="h2">值不值得，四周试点之后见分晓</h2>
+          <p class="lead">先在一台设备上试四周：不改现有流程，报警照报，只是多问它一句。</p>
+        </header>
+
+        <div class="formula" data-anim="card" data-win="-0.2,0">
+          <span class="slot"><b>单次非计划停机成本</b><small>客户提供</small></span><i>×</i>
+          <span class="slot"><b>平均停机时间缩短</b><small>试点测得</small></span><i>×</i>
+          <span class="slot"><b>年故障次数</b><small>客户提供</small></span>
+        </div>
+
+        <div class="metrics" data-anim="fade" data-win=".22,.46">
+          <p>四周里只看这四个指标，客户自己就能验收</p>
+          <div><span>平均维修时长</span><span>首次修复率</span><span>误升级率</span><span>专家到场次数</span></div>
+        </div>
+
+        <p class="roi__end" data-anim="card" data-win=".7,.9">没有客户数据，就不虚构 ROI。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 06 · 边界与收尾 ============== -->
+  <section class="scene scene--sec scene--dark" id="close" data-scene="close" data-chapter="close" data-theme="dark" data-beats="0,.6,.94" style="--travel:320svh">
+    <div class="scene__viewport sec">
+      <div class="sheet sheet--dark" aria-hidden="true"><div class="horizon horizon--low"></div><div class="grain"></div></div>
+      <div class="sec__inner close">
+        <div class="limits" data-anim="limits" data-win="-0.3,0|.26,.4">
+          <p class="eyebrow eyebrow--dark"><span>07</span>边界</p>
+          <h2 class="h2 h2--dark">现在还做不到的</h2>
+          <div class="lims">
+            <article class="lim"><b>一次回答要等 15 秒左右</b><p>提示词有 2.4 万字，每次都要完整传给模型。</p><p class="lim__next">下一步：把提示词缓存起来，或者按报警码拆成小规则。</p></article>
+            <article class="lim"><b>资料更新还得靠手动</b><p>同一份资料现在存在三个地方：原始表格、多维表格、提示词。</p><p class="lim__next">下一步：只留多维表格这一个来源。</p></article>
+          </div>
+        </div>
+
+        <div class="asks" data-anim="asks" data-win=".4,.62|.7,.78">
+          <p class="asks__k">如果明天去见这家工厂，我会先问三个问题</p>
+          <p class="ask"><span class="line"><span class="line__in">这台设备一次非计划停机，成本是多少？</span></span></p>
+          <p class="ask"><span class="line"><span class="line__in">从报修到工程师到场，平均需要多久？</span></span></p>
+          <p class="ask"><span class="line"><span class="line__in">设备手册最后一次更新，是什么时候？</span></span></p>
+          <p class="asks__so">前两个决定这件事值不值得做，<br>第三个决定它三个月后还活不活着。</p>
+        </div>
+
+        <div class="finale" data-anim="finale" data-win=".78,.94">
+          <p class="finale__t"><span class="line"><span class="line__in">APX-240</span></span><span class="line"><span class="line__in">现场故障排查助手</span></span></p>
+          <div class="finale__acts">
+            <a class="button button--solid" href="../" target="_blank" rel="noopener">进入现场排查 →</a>
+            <a class="button button--ghost" href="#top">回到开头</a>
+          </div>
+        </div>
+      </div>
+      <p class="colophon">飞书 FDE 实习生面试项目 · 设备资料来自虚构材料《APX-240 自动封装设备说明书》</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- 问题清单 -->
+<div class="drawer" id="issues" hidden>
+  <div class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="issues-t">
+    <div class="drawer__head"><h3 id="issues-t">问题清单</h3><p id="issues-sum"></p><button type="button" class="drawer__x" id="issues-close" aria-label="关闭">×</button></div>
+    <div class="drawer__body" id="issues-body"></div>
+  </div>
+</div>
+
+<div class="hint-keys" aria-hidden="true"><kbd>↓</kbd><kbd>↑</kbd> 逐步推进</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="js/script.js" defer></script>
+</body>
+</html>
