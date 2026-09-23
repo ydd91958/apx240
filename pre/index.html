@@ -230,13 +230,52 @@
     </div>
   </section>
 
-  <!-- ============== 04 · 迭代 ============== -->
+  <!-- ============== 04 · 我做了什么（可量化） ============== -->
+  <section class="scene scene--sec scene--light" id="work" data-scene="work" data-chapter="method" data-theme="light" data-beats="0,.32,.56,.82" style="--travel:320svh">
+    <div class="scene__viewport sec">
+      <div class="sheet sheet--flat" aria-hidden="true"><div class="wash wash--low"></div></div>
+      <div class="sec__inner">
+        <header class="sec-head" data-anim="lead" data-win="-0.35,0">
+          <p class="eyebrow"><span>04</span>我做了什么</p>
+          <h2 class="h2">从一份考试资料，到一个能在现场用的助手</h2>
+        </header>
+
+        <div class="facts facts--work">
+          <article class="wk" data-anim="card" data-win=".12,.32">
+            <h3 class="wk__t">整理规则</h3>
+            <div class="wk__n"><b data-count="8">8</b><span>张知识表</span></div>
+            <p class="wk__d">报警码 · 安全红线 · 正常参数 · 历史案例 · 维修工单 · 升级矩阵 · 鉴别诊断 · 冲突归因</p>
+            <div class="wk__n"><b>2.4</b><span>万字提示词 · 十段结构</span></div>
+            <p class="wk__d">v3.0 到 v3.8.2 共 9 个版本，现已封版。</p>
+          </article>
+
+          <article class="wk" data-anim="card" data-win=".36,.56">
+            <h3 class="wk__t">测试和修复</h3>
+            <div class="wk__n"><b data-count="12">12</b><span>个测试用例 · 9 轮回归</span></div>
+            <p class="wk__d">覆盖文字、图片两种输入，以及安全红线、零历史案例、通信中断、生产压力等场景。</p>
+            <div class="wk__n"><b data-count-issues>—</b><span>项问题已关闭（共 42 项）</span></div>
+            <p class="wk__d">每一项都记着现象、根因和改了哪一条规则。<button type="button" class="tlink tlink--blue" id="issues-open">查看清单 →</button></p>
+          </article>
+
+          <article class="wk" data-anim="card" data-win=".6,.8">
+            <h3 class="wk__t">现场入口</h3>
+            <div class="wk__n"><b data-count="3">3</b><span>种输入：文字 · 照片 · 语音</span></div>
+            <p class="wk__d">手机照片在浏览器里先压到长边 1600、1.2MB 以内，原图直传会被接口拒绝，还会让这轮对话发不出去。</p>
+            <div class="wk__n"><b data-count="50">50</b><span>项自动化检查</span></div>
+            <p class="wk__d">工作台是自己写的单页，已部署，手机打开就能用。</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 05 · 迭代 ============== -->
   <section class="scene scene--sec scene--light" id="iter" data-scene="iter" data-chapter="iter" data-theme="light" data-beats="0,.3,.46,.62,.76,.94" style="--travel:340svh">
     <div class="scene__viewport sec">
       <div class="sheet sheet--flat" aria-hidden="true"><div class="wash wash--low"></div></div>
       <div class="sec__inner">
         <header class="sec-head sec-head--left" data-anim="lead" data-win="-0.3,0">
-          <p class="eyebrow"><span>04</span>怎么改到能用</p>
+          <p class="eyebrow"><span>05</span>怎么改到能用</p>
           <h2 class="h2">一个改了三次才修好的问题</h2>
           <p class="lead">安全规则 SAFE-01，总在不该出现的场景里被引用。</p>
         </header>
@@ -255,12 +294,7 @@
           <p><span class="line"><span class="line__in">同一个问题改了两次还复发，</span></span><span class="line"><span class="line__in">说明我修的可能不是根因。</span></span></p>
         </blockquote>
 
-        <p class="stats" data-anim="fade" data-win="-0.25,0">
-          <span><b data-count="9">9</b>轮回归测试</span>
-          <span><b data-count-issues>—</b>项问题已关闭</span>
-          <span><b data-count="50">50</b>项前端自动化检查</span>
-          <button type="button" class="tlink tlink--blue" id="issues-open">查看问题清单 →</button>
-        </p>
+        <p class="stats" data-anim="fade" data-win=".84,.96">还剩 1 项没修完：【已知事实】偶尔会混进「提问者角色」这类非设备信息，已经写进已知局限里。</p>
       </div>
     </div>
   </section>
@@ -271,7 +305,7 @@
       <div class="sheet" aria-hidden="true"><div class="wash"></div></div>
       <div class="sec__inner split split--loop">
         <header class="sec-head sec-head--side" data-anim="lead" data-win="-0.35,0">
-          <p class="eyebrow"><span>05</span>落地</p>
+          <p class="eyebrow"><span>06</span>落地</p>
           <h2 class="h2">一次故障结束后，<br>经验不能跟着人一起离开。</h2>
           <p class="lead">维修结果进入记录，下一次同类故障可以直接复用。</p>
           <div class="legend" data-anim="fade" data-win=".78,.92"><span><i class="st st--on"></i>已实现</span><span><i class="st st--plan"></i>下一步产品化</span></div>
@@ -296,13 +330,49 @@
     </div>
   </section>
 
-  <!-- ============== 05B · 落地：ROI ============== -->
+  <!-- ============== 06B · 落地：卖给谁、怎么开始、怎么复制 ============== -->
+  <section class="scene scene--sec scene--light" id="biz" data-scene="biz" data-chapter="business" data-theme="light" data-beats="0,.32,.56,.82,.95" style="--travel:320svh">
+    <div class="scene__viewport sec">
+      <div class="sheet" aria-hidden="true"><div class="wash"></div></div>
+      <div class="sec__inner">
+        <header class="sec-head" data-anim="lead" data-win="-0.35,0">
+          <p class="eyebrow"><span>06</span>落地</p>
+          <h2 class="h2">卖给谁，怎么开始，怎么复制</h2>
+        </header>
+
+        <div class="facts facts--biz">
+          <article class="fact" data-anim="card" data-win=".12,.32">
+            <i class="fact__no">谁需要</i>
+            <h3 class="fact__t">设备多、停机贵的工厂</h3>
+            <p class="fact__d">用的人是操作工和维修工，掏钱的是设备或生产负责人。</p>
+            <p class="fact__eg">对他们来说，价值不是「有个 AI」，而是少停一次机、少叫一次专家。</p>
+          </article>
+          <article class="fact" data-anim="card" data-win=".36,.56">
+            <i class="fact__no">怎么开始</i>
+            <h3 class="fact__t">一台设备，四周试点</h3>
+            <p class="fact__d">不改现有流程：报警照报，只是多问它一句。</p>
+            <p class="fact__eg">四周里只看四个指标，客户自己就能验收，不用听我解释模型。</p>
+          </article>
+          <article class="fact" data-anim="card" data-win=".6,.8">
+            <i class="fact__no">怎么复制</i>
+            <h3 class="fact__t">换设备只换那 8 张表</h3>
+            <p class="fact__d">同型号设备：改表里的数据，规则逻辑不动。</p>
+            <p class="fact__eg">换一类新设备：按同样的 8 张表重填一遍；按这次的工作量估算，一次配置大约一周。</p>
+          </article>
+        </div>
+
+        <p class="biz__note" data-anim="fade" data-win=".84,.95">这三条是我的判断，还没有客户数据支撑，要在试点里验证。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 06C · 落地：ROI ============== -->
   <section class="scene scene--sec scene--light" id="value" data-scene="value" data-chapter="business" data-theme="light" data-beats="0,.46,.9" style="--travel:240svh">
     <div class="scene__viewport sec">
       <div class="sheet sheet--flat" aria-hidden="true"><div class="wash wash--low"></div></div>
       <div class="sec__inner roi">
         <header class="sec-head" data-anim="lead" data-win="-0.35,0">
-          <p class="eyebrow"><span>05</span>值不值得做</p>
+          <p class="eyebrow"><span>06</span>值不值得做</p>
           <h2 class="h2">没有客户数据，不虚构 ROI。</h2>
         </header>
 
@@ -328,7 +398,7 @@
       <div class="sheet sheet--dark" aria-hidden="true"><div class="horizon horizon--low"></div><div class="grain"></div></div>
       <div class="sec__inner close">
         <div class="limits" data-anim="limits" data-win="-0.3,0|.26,.4">
-          <p class="eyebrow eyebrow--dark"><span>06</span>边界</p>
+          <p class="eyebrow eyebrow--dark"><span>07</span>边界</p>
           <h2 class="h2 h2--dark">现在还做不到的</h2>
           <div class="lims">
             <article class="lim"><b>回答一次要 15 秒左右</b><p>提示词约 2.4 万字，每次都要完整传入。</p><p class="lim__next">下一步：缓存提示词，或按报警码拆成小规则。</p></article>

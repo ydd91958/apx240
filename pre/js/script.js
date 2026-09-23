@@ -328,7 +328,7 @@
     for (const [it, st] of boxes) applyBox(it, st);
 
     // 统计数字滚动
-    if (s.id === "iter") counters(s, win(p, -0.25, 0));
+    if (s.id === "work") counters(s, win(p, 0.06, 0.34));
   }
 
   function stack(it, k) {
@@ -428,7 +428,7 @@
       });
       it.el.style.setProperty("--ring-k", 1); it.el.style.setProperty("--line-k", 1);
     });
-    if (s.id === "iter") counters(s, 1);
+    if (s.id === "work") counters(s, 1);
   }
 
   let countersDone = -1;
